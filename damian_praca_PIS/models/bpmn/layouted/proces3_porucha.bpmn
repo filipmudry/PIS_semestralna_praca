@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_Proces3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.6.1">
+  <bpmn:message id="Message_ToTroubleshooting" name="Prechod na riešenie poruchy" />
+  <bpmn:message id="Message_OutageNotified" name="Odstávka nahlásená" />
+  <bpmn:message id="Message_SparePartArrived" name="Náhradný diel doručený" />
+  <bpmn:message id="Message_ReconnectionApproved" name="Opätovné pripojenie schválené" />
+  <bpmn:message id="Message_ReconnectionDenied" name="Opätovné pripojenie zamietnuté" />
+  <bpmn:message id="Message_OperationResumed" name="Prevádzka obnovená" />
+  <bpmn:process id="Process_Troubleshooting" name="Proces 3 – Riešenie poruchy a obnovenie prevádzky" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Proces3">
+      <bpmn:lane id="Lane3_ControlSystem" name="Riadiaci systém">
+        <bpmn:flowNodeRef>StartEvent_FaultRecording</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_FaultDetection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_RecordingReport</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_CollectDiagnostics</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_EmergencyShutdown</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ShutdownMerged</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PostShutdownSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_CreateServiceTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_NotifyDispatcherOutage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PostShutdownJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SubProcess_DiagnosticsRepair</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryEvent_RepairTimeout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_RequestReconnection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_WaitReconnectionResponse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_ReconnectionApproved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_ReconnectionDenied</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_ReconnectionTimeout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_RestartProduction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_SendResumptionNotification</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_OperationResumed</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane3_Operator" name="Operátor elektrárne">
+        <bpmn:flowNodeRef>Activity_EvaluationSituation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_IsFaultCritical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_PlannedShutdown</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_SecureSite</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_RescheduleReconnection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_WaitBeforeRetry</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_CallDispatcher</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_EscalateProblem</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_EscalationHandled</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane3_Dispatcher" name="Dispečer distribučnej siete">
+        <bpmn:flowNodeRef>Activity_RecordOutage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_RecordResumption</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane3_ServiceTechnician" name="Servisný technik">
+        <bpmn:flowNodeRef>StartEvent_SubProcessStart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_Diagnostics</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_SparePartNeeded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_WaitForSparePart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_SparePartArrived</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_SparePartDelayed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_ChaseSparePart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_ReplacePart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_Correction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_FunctionalityTest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_DeviceOk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_SubProcessEnd</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_FaultRecording" name="Porucha nahlásená">
+      <bpmn:outgoing>Flow_Start_To_FaultDetection</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_ToTroubleshooting" />
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_FaultDetection" name="Deteguj poruchu">
+      <bpmn:incoming>Flow_Start_To_FaultDetection</bpmn:incoming>
+      <bpmn:outgoing>Flow_FaultDetection_To_RecordingReport</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_RecordingReport" name="Zaznamenaj hlásenie">
+      <bpmn:incoming>Flow_FaultDetection_To_RecordingReport</bpmn:incoming>
+      <bpmn:outgoing>Flow_RecordingReport_To_CollectDiagnostics</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_CollectDiagnostics" name="Zhromaždi diagnostické údaje">
+      <bpmn:incoming>Flow_RecordingReport_To_CollectDiagnostics</bpmn:incoming>
+      <bpmn:outgoing>Flow_CollectDiagnostics_To_EvaluationSituation</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_EvaluationSituation" name="Vyhodnoť situáciu">
+      <bpmn:incoming>Flow_CollectDiagnostics_To_EvaluationSituation</bpmn:incoming>
+      <bpmn:outgoing>Flow_EvaluationSituation_To_IsFaultCritical</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_IsFaultCritical" name="Je porucha kritická?">
+      <bpmn:incoming>Flow_EvaluationSituation_To_IsFaultCritical</bpmn:incoming>
+      <bpmn:outgoing>Flow_IsFaultCritical_Yes_To_EmergencyShutdown</bpmn:outgoing>
+      <bpmn:outgoing>Flow_IsFaultCritical_No_To_PlannedShutdown</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Activity_EmergencyShutdown" name="Núdzové zastavenie turbíny">
+      <bpmn:incoming>Flow_IsFaultCritical_Yes_To_EmergencyShutdown</bpmn:incoming>
+      <bpmn:outgoing>Flow_EmergencyShutdown_To_ShutdownMerged</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_PlannedShutdown" name="Plánované odstavenie">
+      <bpmn:incoming>Flow_IsFaultCritical_No_To_PlannedShutdown</bpmn:incoming>
+      <bpmn:outgoing>Flow_PlannedShutdown_To_ShutdownMerged</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_ShutdownMerged" name="Turbína odstavená">
+      <bpmn:incoming>Flow_EmergencyShutdown_To_ShutdownMerged</bpmn:incoming>
+      <bpmn:incoming>Flow_PlannedShutdown_To_ShutdownMerged</bpmn:incoming>
+      <bpmn:outgoing>Flow_ShutdownMerged_To_PostShutdownSplit</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="Gateway_PostShutdownSplit" name="Príprava servisu (paralelne)">
+      <bpmn:incoming>Flow_ShutdownMerged_To_PostShutdownSplit</bpmn:incoming>
+      <bpmn:outgoing>Flow_PostShutdownSplit_To_CreateServiceTask</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PostShutdownSplit_To_NotifyDispatcherOutage</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PostShutdownSplit_To_SecureSite</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Activity_CreateServiceTask" name="Vytvor servisnú úlohu">
+      <bpmn:incoming>Flow_PostShutdownSplit_To_CreateServiceTask</bpmn:incoming>
+      <bpmn:outgoing>Flow_CreateServiceTask_To_PostShutdownJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Activity_NotifyDispatcherOutage" name="Informuj DDS o odstávke">
+      <bpmn:incoming>Flow_PostShutdownSplit_To_NotifyDispatcherOutage</bpmn:incoming>
+      <bpmn:outgoing>Flow_NotifyDispatcherOutage_To_RecordOutage</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="Activity_RecordOutage" name="Zaeviduj odstávku v sieti">
+      <bpmn:incoming>Flow_NotifyDispatcherOutage_To_RecordOutage</bpmn:incoming>
+      <bpmn:outgoing>Flow_RecordOutage_To_PostShutdownJoin</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Activity_SecureSite" name="Zabezpeč prístup a bezpečnosť">
+      <bpmn:incoming>Flow_PostShutdownSplit_To_SecureSite</bpmn:incoming>
+      <bpmn:outgoing>Flow_SecureSite_To_PostShutdownJoin</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Gateway_PostShutdownJoin" name="Servis pripravený">
+      <bpmn:incoming>Flow_CreateServiceTask_To_PostShutdownJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_RecordOutage_To_PostShutdownJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_SecureSite_To_PostShutdownJoin</bpmn:incoming>
+      <bpmn:outgoing>Flow_PostShutdownJoin_To_SubProcess</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:subProcess id="SubProcess_DiagnosticsRepair" name="Diagnostika a oprava">
+      <bpmn:incoming>Flow_PostShutdownJoin_To_SubProcess</bpmn:incoming>
+      <bpmn:outgoing>Flow_SubProcess_To_RequestReconnection</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent_SubProcessStart" name="Začni diagnostiku">
+        <bpmn:outgoing>Flow_SubStart_To_Diagnostics</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:manualTask id="Activity_Diagnostics" name="Diagnostika na mieste">
+        <bpmn:incoming>Flow_SubStart_To_Diagnostics</bpmn:incoming>
+        <bpmn:outgoing>Flow_Diagnostics_To_SparePartNeeded</bpmn:outgoing>
+      </bpmn:manualTask>
+      <bpmn:exclusiveGateway id="Gateway_SparePartNeeded" name="Potrebný náhradný diel?">
+        <bpmn:incoming>Flow_Diagnostics_To_SparePartNeeded</bpmn:incoming>
+        <bpmn:outgoing>Flow_SparePartNeeded_No_To_Correction</bpmn:outgoing>
+        <bpmn:outgoing>Flow_SparePartNeeded_Yes_To_WaitForSparePart</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:eventBasedGateway id="Gateway_WaitForSparePart" name="Čakaj na diel">
+        <bpmn:incoming>Flow_SparePartNeeded_Yes_To_WaitForSparePart</bpmn:incoming>
+        <bpmn:outgoing>Flow_WaitForSparePart_To_SparePartArrived</bpmn:outgoing>
+        <bpmn:outgoing>Flow_WaitForSparePart_To_SparePartDelayed</bpmn:outgoing>
+      </bpmn:eventBasedGateway>
+      <bpmn:intermediateCatchEvent id="Event_SparePartArrived" name="Diel doručený">
+        <bpmn:incoming>Flow_WaitForSparePart_To_SparePartArrived</bpmn:incoming>
+        <bpmn:outgoing>Flow_SparePartArrived_To_ReplacePart</bpmn:outgoing>
+        <bpmn:messageEventDefinition messageRef="Message_SparePartArrived" />
+      </bpmn:intermediateCatchEvent>
+      <bpmn:intermediateCatchEvent id="Event_SparePartDelayed" name="Oneskorená dodávka">
+        <bpmn:incoming>Flow_WaitForSparePart_To_SparePartDelayed</bpmn:incoming>
+        <bpmn:outgoing>Flow_SparePartDelayed_To_ChaseSparePart</bpmn:outgoing>
+        <bpmn:timerEventDefinition>
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT4H</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:userTask id="Activity_ChaseSparePart" name="Urgencia dodávky dielu">
+        <bpmn:incoming>Flow_SparePartDelayed_To_ChaseSparePart</bpmn:incoming>
+        <bpmn:outgoing>Flow_ChaseSparePart_To_WaitForSparePart</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:manualTask id="Activity_ReplacePart" name="Vymeň náhradný diel">
+        <bpmn:incoming>Flow_SparePartArrived_To_ReplacePart</bpmn:incoming>
+        <bpmn:outgoing>Flow_ReplacePart_To_Correction</bpmn:outgoing>
+      </bpmn:manualTask>
+      <bpmn:manualTask id="Activity_Correction" name="Oprava/kalibrácia">
+        <bpmn:incoming>Flow_SparePartNeeded_No_To_Correction</bpmn:incoming>
+        <bpmn:incoming>Flow_ReplacePart_To_Correction</bpmn:incoming>
+        <bpmn:outgoing>Flow_Correction_To_FunctionalityTest</bpmn:outgoing>
+      </bpmn:manualTask>
+      <bpmn:serviceTask id="Activity_FunctionalityTest" name="Test funkčnosti zariadenia">
+        <bpmn:incoming>Flow_Correction_To_FunctionalityTest</bpmn:incoming>
+        <bpmn:outgoing>Flow_FunctionalityTest_To_DeviceOk</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="Gateway_DeviceOk" name="Zariadenie v poriadku?">
+        <bpmn:incoming>Flow_FunctionalityTest_To_DeviceOk</bpmn:incoming>
+        <bpmn:outgoing>Flow_DeviceOk_Yes_To_SubProcessEnd</bpmn:outgoing>
+        <bpmn:outgoing>Flow_DeviceOk_No_To_Correction</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent_SubProcessEnd" name="Oprava dokončená">
+        <bpmn:incoming>Flow_DeviceOk_Yes_To_SubProcessEnd</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_SubStart_To_Diagnostics" sourceRef="StartEvent_SubProcessStart" targetRef="Activity_Diagnostics" />
+      <bpmn:sequenceFlow id="Flow_Diagnostics_To_SparePartNeeded" sourceRef="Activity_Diagnostics" targetRef="Gateway_SparePartNeeded" />
+      <bpmn:sequenceFlow id="Flow_SparePartNeeded_No_To_Correction" name="Nie" sourceRef="Gateway_SparePartNeeded" targetRef="Activity_Correction" />
+      <bpmn:sequenceFlow id="Flow_SparePartNeeded_Yes_To_WaitForSparePart" name="Áno" sourceRef="Gateway_SparePartNeeded" targetRef="Gateway_WaitForSparePart" />
+      <bpmn:sequenceFlow id="Flow_WaitForSparePart_To_SparePartArrived" name="Doručené" sourceRef="Gateway_WaitForSparePart" targetRef="Event_SparePartArrived" />
+      <bpmn:sequenceFlow id="Flow_WaitForSparePart_To_SparePartDelayed" name="Meškanie" sourceRef="Gateway_WaitForSparePart" targetRef="Event_SparePartDelayed" />
+      <bpmn:sequenceFlow id="Flow_SparePartArrived_To_ReplacePart" sourceRef="Event_SparePartArrived" targetRef="Activity_ReplacePart" />
+      <bpmn:sequenceFlow id="Flow_SparePartDelayed_To_ChaseSparePart" sourceRef="Event_SparePartDelayed" targetRef="Activity_ChaseSparePart" />
+      <bpmn:sequenceFlow id="Flow_ChaseSparePart_To_WaitForSparePart" sourceRef="Activity_ChaseSparePart" targetRef="Gateway_WaitForSparePart" />
+      <bpmn:sequenceFlow id="Flow_ReplacePart_To_Correction" sourceRef="Activity_ReplacePart" targetRef="Activity_Correction" />
+      <bpmn:sequenceFlow id="Flow_Correction_To_FunctionalityTest" sourceRef="Activity_Correction" targetRef="Activity_FunctionalityTest" />
+      <bpmn:sequenceFlow id="Flow_FunctionalityTest_To_DeviceOk" sourceRef="Activity_FunctionalityTest" targetRef="Gateway_DeviceOk" />
+      <bpmn:sequenceFlow id="Flow_DeviceOk_Yes_To_SubProcessEnd" name="Áno" sourceRef="Gateway_DeviceOk" targetRef="EndEvent_SubProcessEnd" />
+      <bpmn:sequenceFlow id="Flow_DeviceOk_No_To_Correction" name="Nie" sourceRef="Gateway_DeviceOk" targetRef="Activity_Correction" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="BoundaryEvent_RepairTimeout" name="Oprava trvá dlho" cancelActivity="false" attachedToRef="SubProcess_DiagnosticsRepair">
+      <bpmn:outgoing>Flow_RepairTimeout_To_EscalateProblem</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT2H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="Activity_EscalateProblem" name="Eskaluj problém">
+      <bpmn:incoming>Flow_RepairTimeout_To_EscalateProblem</bpmn:incoming>
+      <bpmn:outgoing>Flow_EscalateProblem_To_EscalationHandled</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_EscalationHandled" name="Eskalácia vykonaná">
+      <bpmn:incoming>Flow_EscalateProblem_To_EscalationHandled</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_RequestReconnection" name="Požiadaj o opätovné pripojenie">
+      <bpmn:incoming>Flow_SubProcess_To_RequestReconnection</bpmn:incoming>
+      <bpmn:incoming>Flow_WaitBeforeRetry_To_RequestReconnection</bpmn:incoming>
+      <bpmn:incoming>Flow_CallDispatcher_To_RequestReconnection</bpmn:incoming>
+      <bpmn:outgoing>Flow_RequestReconnection_To_WaitReconnectionResponse</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:eventBasedGateway id="Gateway_WaitReconnectionResponse" name="Čakaj na odpoveď DDS">
+      <bpmn:incoming>Flow_RequestReconnection_To_WaitReconnectionResponse</bpmn:incoming>
+      <bpmn:outgoing>Flow_WaitReconnectionResponse_To_ReconnectionApproved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WaitReconnectionResponse_To_ReconnectionDenied</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WaitReconnectionResponse_To_ReconnectionTimeout</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_ReconnectionApproved" name="Pripojenie schválené">
+      <bpmn:incoming>Flow_WaitReconnectionResponse_To_ReconnectionApproved</bpmn:incoming>
+      <bpmn:outgoing>Flow_ReconnectionApproved_To_RestartProduction</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_ReconnectionApproved" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_ReconnectionDenied" name="Pripojenie zamietnuté">
+      <bpmn:incoming>Flow_WaitReconnectionResponse_To_ReconnectionDenied</bpmn:incoming>
+      <bpmn:outgoing>Flow_ReconnectionDenied_To_RescheduleReconnection</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_ReconnectionDenied" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_ReconnectionTimeout" name="Bez odpovede (timeout)">
+      <bpmn:incoming>Flow_WaitReconnectionResponse_To_ReconnectionTimeout</bpmn:incoming>
+      <bpmn:outgoing>Flow_ReconnectionTimeout_To_CallDispatcher</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="Activity_RescheduleReconnection" name="Naplánuj opätovnú žiadosť">
+      <bpmn:incoming>Flow_ReconnectionDenied_To_RescheduleReconnection</bpmn:incoming>
+      <bpmn:outgoing>Flow_RescheduleReconnection_To_WaitBeforeRetry</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="Event_WaitBeforeRetry" name="Počkaj pred opakovaním">
+      <bpmn:incoming>Flow_RescheduleReconnection_To_WaitBeforeRetry</bpmn:incoming>
+      <bpmn:outgoing>Flow_WaitBeforeRetry_To_RequestReconnection</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT30M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="Activity_CallDispatcher" name="Kontaktuj DDS">
+      <bpmn:incoming>Flow_ReconnectionTimeout_To_CallDispatcher</bpmn:incoming>
+      <bpmn:outgoing>Flow_CallDispatcher_To_RequestReconnection</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Activity_RestartProduction" name="Opätovne spusti výrobu">
+      <bpmn:incoming>Flow_ReconnectionApproved_To_RestartProduction</bpmn:incoming>
+      <bpmn:outgoing>Flow_RestartProduction_To_SendResumptionNotification</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Activity_SendResumptionNotification" name="Odošli oznámenie o obnovení">
+      <bpmn:incoming>Flow_RestartProduction_To_SendResumptionNotification</bpmn:incoming>
+      <bpmn:outgoing>Flow_SendResumptionNotification_To_RecordResumption</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="Activity_RecordResumption" name="Zaeviduj obnovu dodávky">
+      <bpmn:incoming>Flow_SendResumptionNotification_To_RecordResumption</bpmn:incoming>
+      <bpmn:outgoing>Flow_RecordResumption_To_OperationResumed</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_OperationResumed" name="Prevádzka obnovená">
+      <bpmn:incoming>Flow_RecordResumption_To_OperationResumed</bpmn:incoming>
+      <bpmn:messageEventDefinition messageRef="Message_OperationResumed" />
+    </bpmn:endEvent>
+    <bpmn:dataObject id="DataObject_FaultReport" />
+    <bpmn:dataObjectReference id="DataObjectReference_FaultReport" name="Hlásenie poruchy" dataObjectRef="DataObject_FaultReport" />
+    <bpmn:dataObject id="DataObject_ServiceTicket" />
+    <bpmn:dataObjectReference id="DataObjectReference_ServiceTicket" name="Servisná úloha" dataObjectRef="DataObject_ServiceTicket" />
+    <bpmn:dataObject id="DataObject_TestReport" />
+    <bpmn:dataObjectReference id="DataObjectReference_TestReport" name="Výsledok testu" dataObjectRef="DataObject_TestReport" />
+    <bpmn:sequenceFlow id="Flow_Start_To_FaultDetection" sourceRef="StartEvent_FaultRecording" targetRef="Activity_FaultDetection" />
+    <bpmn:sequenceFlow id="Flow_FaultDetection_To_RecordingReport" sourceRef="Activity_FaultDetection" targetRef="Activity_RecordingReport" />
+    <bpmn:sequenceFlow id="Flow_RecordingReport_To_CollectDiagnostics" sourceRef="Activity_RecordingReport" targetRef="Activity_CollectDiagnostics" />
+    <bpmn:sequenceFlow id="Flow_CollectDiagnostics_To_EvaluationSituation" sourceRef="Activity_CollectDiagnostics" targetRef="Activity_EvaluationSituation" />
+    <bpmn:sequenceFlow id="Flow_EvaluationSituation_To_IsFaultCritical" sourceRef="Activity_EvaluationSituation" targetRef="Gateway_IsFaultCritical" />
+    <bpmn:sequenceFlow id="Flow_IsFaultCritical_Yes_To_EmergencyShutdown" name="Áno" sourceRef="Gateway_IsFaultCritical" targetRef="Activity_EmergencyShutdown" />
+    <bpmn:sequenceFlow id="Flow_IsFaultCritical_No_To_PlannedShutdown" name="Nie" sourceRef="Gateway_IsFaultCritical" targetRef="Activity_PlannedShutdown" />
+    <bpmn:sequenceFlow id="Flow_EmergencyShutdown_To_ShutdownMerged" sourceRef="Activity_EmergencyShutdown" targetRef="Gateway_ShutdownMerged" />
+    <bpmn:sequenceFlow id="Flow_PlannedShutdown_To_ShutdownMerged" sourceRef="Activity_PlannedShutdown" targetRef="Gateway_ShutdownMerged" />
+    <bpmn:sequenceFlow id="Flow_ShutdownMerged_To_PostShutdownSplit" sourceRef="Gateway_ShutdownMerged" targetRef="Gateway_PostShutdownSplit" />
+    <bpmn:sequenceFlow id="Flow_PostShutdownSplit_To_CreateServiceTask" sourceRef="Gateway_PostShutdownSplit" targetRef="Activity_CreateServiceTask" />
+    <bpmn:sequenceFlow id="Flow_PostShutdownSplit_To_NotifyDispatcherOutage" sourceRef="Gateway_PostShutdownSplit" targetRef="Activity_NotifyDispatcherOutage" />
+    <bpmn:sequenceFlow id="Flow_PostShutdownSplit_To_SecureSite" sourceRef="Gateway_PostShutdownSplit" targetRef="Activity_SecureSite" />
+    <bpmn:sequenceFlow id="Flow_CreateServiceTask_To_PostShutdownJoin" sourceRef="Activity_CreateServiceTask" targetRef="Gateway_PostShutdownJoin" />
+    <bpmn:sequenceFlow id="Flow_NotifyDispatcherOutage_To_RecordOutage" sourceRef="Activity_NotifyDispatcherOutage" targetRef="Activity_RecordOutage" />
+    <bpmn:sequenceFlow id="Flow_RecordOutage_To_PostShutdownJoin" sourceRef="Activity_RecordOutage" targetRef="Gateway_PostShutdownJoin" />
+    <bpmn:sequenceFlow id="Flow_SecureSite_To_PostShutdownJoin" sourceRef="Activity_SecureSite" targetRef="Gateway_PostShutdownJoin" />
+    <bpmn:sequenceFlow id="Flow_PostShutdownJoin_To_SubProcess" sourceRef="Gateway_PostShutdownJoin" targetRef="SubProcess_DiagnosticsRepair" />
+    <bpmn:sequenceFlow id="Flow_SubProcess_To_RequestReconnection" sourceRef="SubProcess_DiagnosticsRepair" targetRef="Activity_RequestReconnection" />
+    <bpmn:sequenceFlow id="Flow_RepairTimeout_To_EscalateProblem" sourceRef="BoundaryEvent_RepairTimeout" targetRef="Activity_EscalateProblem" />
+    <bpmn:sequenceFlow id="Flow_EscalateProblem_To_EscalationHandled" sourceRef="Activity_EscalateProblem" targetRef="EndEvent_EscalationHandled" />
+    <bpmn:sequenceFlow id="Flow_RequestReconnection_To_WaitReconnectionResponse" sourceRef="Activity_RequestReconnection" targetRef="Gateway_WaitReconnectionResponse" />
+    <bpmn:sequenceFlow id="Flow_WaitReconnectionResponse_To_ReconnectionApproved" name="Schválené" sourceRef="Gateway_WaitReconnectionResponse" targetRef="Event_ReconnectionApproved" />
+    <bpmn:sequenceFlow id="Flow_WaitReconnectionResponse_To_ReconnectionDenied" name="Zamietnuté" sourceRef="Gateway_WaitReconnectionResponse" targetRef="Event_ReconnectionDenied" />
+    <bpmn:sequenceFlow id="Flow_WaitReconnectionResponse_To_ReconnectionTimeout" name="Timeout" sourceRef="Gateway_WaitReconnectionResponse" targetRef="Event_ReconnectionTimeout" />
+    <bpmn:sequenceFlow id="Flow_ReconnectionApproved_To_RestartProduction" sourceRef="Event_ReconnectionApproved" targetRef="Activity_RestartProduction" />
+    <bpmn:sequenceFlow id="Flow_ReconnectionDenied_To_RescheduleReconnection" sourceRef="Event_ReconnectionDenied" targetRef="Activity_RescheduleReconnection" />
+    <bpmn:sequenceFlow id="Flow_RescheduleReconnection_To_WaitBeforeRetry" sourceRef="Activity_RescheduleReconnection" targetRef="Event_WaitBeforeRetry" />
+    <bpmn:sequenceFlow id="Flow_WaitBeforeRetry_To_RequestReconnection" sourceRef="Event_WaitBeforeRetry" targetRef="Activity_RequestReconnection" />
+    <bpmn:sequenceFlow id="Flow_ReconnectionTimeout_To_CallDispatcher" sourceRef="Event_ReconnectionTimeout" targetRef="Activity_CallDispatcher" />
+    <bpmn:sequenceFlow id="Flow_CallDispatcher_To_RequestReconnection" sourceRef="Activity_CallDispatcher" targetRef="Activity_RequestReconnection" />
+    <bpmn:sequenceFlow id="Flow_RestartProduction_To_SendResumptionNotification" sourceRef="Activity_RestartProduction" targetRef="Activity_SendResumptionNotification" />
+    <bpmn:sequenceFlow id="Flow_SendResumptionNotification_To_RecordResumption" sourceRef="Activity_SendResumptionNotification" targetRef="Activity_RecordResumption" />
+    <bpmn:sequenceFlow id="Flow_RecordResumption_To_OperationResumed" sourceRef="Activity_RecordResumption" targetRef="EndEvent_OperationResumed" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_Troubleshooting">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_Troubleshooting" bpmnElement="Process_Troubleshooting">
+      <bpmndi:BPMNShape id="StartEvent_FaultRecording_di" bpmnElement="StartEvent_FaultRecording">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_FaultDetection_di" bpmnElement="Activity_FaultDetection">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RecordingReport_di" bpmnElement="Activity_RecordingReport">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_CollectDiagnostics_di" bpmnElement="Activity_CollectDiagnostics">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_EvaluationSituation_di" bpmnElement="Activity_EvaluationSituation">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_IsFaultCritical_di" bpmnElement="Gateway_IsFaultCritical" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_EmergencyShutdown_di" bpmnElement="Activity_EmergencyShutdown">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ShutdownMerged_di" bpmnElement="Gateway_ShutdownMerged" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PostShutdownSplit_di" bpmnElement="Gateway_PostShutdownSplit">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_CreateServiceTask_di" bpmnElement="Activity_CreateServiceTask">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PostShutdownJoin_di" bpmnElement="Gateway_PostShutdownJoin">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_DiagnosticsRepair_di" bpmnElement="SubProcess_DiagnosticsRepair">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_RepairTimeout_di" bpmnElement="BoundaryEvent_RepairTimeout">
+        <dc:Bounds x="1857" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RequestReconnection_di" bpmnElement="Activity_RequestReconnection">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_WaitReconnectionResponse_di" bpmnElement="Gateway_WaitReconnectionResponse">
+        <dc:Bounds x="2150" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_ReconnectionApproved_di" bpmnElement="Event_ReconnectionApproved">
+        <dc:Bounds x="2307" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RestartProduction_di" bpmnElement="Activity_RestartProduction">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_SendResumptionNotification_di" bpmnElement="Activity_SendResumptionNotification">
+        <dc:Bounds x="2575" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RecordResumption_di" bpmnElement="Activity_RecordResumption">
+        <dc:Bounds x="2725" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_OperationResumed_di" bpmnElement="EndEvent_OperationResumed">
+        <dc:Bounds x="2907" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObject_FaultReport_di" bpmnElement="DataObject_FaultReport">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_PlannedShutdown_di" bpmnElement="Activity_PlannedShutdown">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_NotifyDispatcherOutage_di" bpmnElement="Activity_NotifyDispatcherOutage">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RecordOutage_di" bpmnElement="Activity_RecordOutage">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_EscalateProblem_di" bpmnElement="Activity_EscalateProblem">
+        <dc:Bounds x="1975" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_EscalationHandled_di" bpmnElement="EndEvent_EscalationHandled">
+        <dc:Bounds x="2157" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_ReconnectionDenied_di" bpmnElement="Event_ReconnectionDenied">
+        <dc:Bounds x="2307" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RescheduleReconnection_di" bpmnElement="Activity_RescheduleReconnection">
+        <dc:Bounds x="2425" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_WaitBeforeRetry_di" bpmnElement="Event_WaitBeforeRetry">
+        <dc:Bounds x="2607" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_FaultReport_di" bpmnElement="DataObjectReference_FaultReport">
+        <dc:Bounds x="57" y="325" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_SecureSite_di" bpmnElement="Activity_SecureSite">
+        <dc:Bounds x="1375" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_ReconnectionTimeout_di" bpmnElement="Event_ReconnectionTimeout">
+        <dc:Bounds x="2307" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_CallDispatcher_di" bpmnElement="Activity_CallDispatcher">
+        <dc:Bounds x="2425" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObject_ServiceTicket_di" bpmnElement="DataObject_ServiceTicket">
+        <dc:Bounds x="25" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_ServiceTicket_di" bpmnElement="DataObjectReference_ServiceTicket">
+        <dc:Bounds x="57" y="605" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObject_TestReport_di" bpmnElement="DataObject_TestReport">
+        <dc:Bounds x="25" y="730" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_TestReport_di" bpmnElement="DataObjectReference_TestReport">
+        <dc:Bounds x="57" y="885" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_To_FaultDetection_di" bpmnElement="Flow_Start_To_FaultDetection">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FaultDetection_To_RecordingReport_di" bpmnElement="Flow_FaultDetection_To_RecordingReport">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RecordingReport_To_CollectDiagnostics_di" bpmnElement="Flow_RecordingReport_To_CollectDiagnostics">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CollectDiagnostics_To_EvaluationSituation_di" bpmnElement="Flow_CollectDiagnostics_To_EvaluationSituation">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_EvaluationSituation_To_IsFaultCritical_di" bpmnElement="Flow_EvaluationSituation_To_IsFaultCritical">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_IsFaultCritical_Yes_To_EmergencyShutdown_di" bpmnElement="Flow_IsFaultCritical_Yes_To_EmergencyShutdown">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_IsFaultCritical_No_To_PlannedShutdown_di" bpmnElement="Flow_IsFaultCritical_No_To_PlannedShutdown">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_EmergencyShutdown_To_ShutdownMerged_di" bpmnElement="Flow_EmergencyShutdown_To_ShutdownMerged">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ShutdownMerged_To_PostShutdownSplit_di" bpmnElement="Flow_ShutdownMerged_To_PostShutdownSplit">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PostShutdownSplit_To_CreateServiceTask_di" bpmnElement="Flow_PostShutdownSplit_To_CreateServiceTask">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PostShutdownSplit_To_NotifyDispatcherOutage_di" bpmnElement="Flow_PostShutdownSplit_To_NotifyDispatcherOutage">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PostShutdownSplit_To_SecureSite_di" bpmnElement="Flow_PostShutdownSplit_To_SecureSite">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1375" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CreateServiceTask_To_PostShutdownJoin_di" bpmnElement="Flow_CreateServiceTask_To_PostShutdownJoin">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PostShutdownJoin_To_SubProcess_di" bpmnElement="Flow_PostShutdownJoin_To_SubProcess">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SubProcess_To_RequestReconnection_di" bpmnElement="Flow_SubProcess_To_RequestReconnection">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RepairTimeout_To_EscalateProblem_di" bpmnElement="Flow_RepairTimeout_To_EscalateProblem">
+        <di:waypoint x="1875" y="128" />
+        <di:waypoint x="1875" y="210" />
+        <di:waypoint x="1975" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RequestReconnection_To_WaitReconnectionResponse_di" bpmnElement="Flow_RequestReconnection_To_WaitReconnectionResponse">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2150" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitReconnectionResponse_To_ReconnectionApproved_di" bpmnElement="Flow_WaitReconnectionResponse_To_ReconnectionApproved">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2307" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitReconnectionResponse_To_ReconnectionDenied_di" bpmnElement="Flow_WaitReconnectionResponse_To_ReconnectionDenied">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2250" y="70" />
+        <di:waypoint x="2250" y="140" />
+        <di:waypoint x="2250" y="140" />
+        <di:waypoint x="2250" y="210" />
+        <di:waypoint x="2307" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitReconnectionResponse_To_ReconnectionTimeout_di" bpmnElement="Flow_WaitReconnectionResponse_To_ReconnectionTimeout">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2250" y="70" />
+        <di:waypoint x="2250" y="280" />
+        <di:waypoint x="2250" y="280" />
+        <di:waypoint x="2250" y="350" />
+        <di:waypoint x="2307" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ReconnectionApproved_To_RestartProduction_di" bpmnElement="Flow_ReconnectionApproved_To_RestartProduction">
+        <di:waypoint x="2343" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RestartProduction_To_SendResumptionNotification_di" bpmnElement="Flow_RestartProduction_To_SendResumptionNotification">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2575" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SendResumptionNotification_To_RecordResumption_di" bpmnElement="Flow_SendResumptionNotification_To_RecordResumption">
+        <di:waypoint x="2675" y="70" />
+        <di:waypoint x="2725" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RecordResumption_To_OperationResumed_di" bpmnElement="Flow_RecordResumption_To_OperationResumed">
+        <di:waypoint x="2825" y="70" />
+        <di:waypoint x="2907" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PlannedShutdown_To_ShutdownMerged_di" bpmnElement="Flow_PlannedShutdown_To_ShutdownMerged">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_NotifyDispatcherOutage_To_RecordOutage_di" bpmnElement="Flow_NotifyDispatcherOutage_To_RecordOutage">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RecordOutage_To_PostShutdownJoin_di" bpmnElement="Flow_RecordOutage_To_PostShutdownJoin">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_EscalateProblem_To_EscalationHandled_di" bpmnElement="Flow_EscalateProblem_To_EscalationHandled">
+        <di:waypoint x="2075" y="210" />
+        <di:waypoint x="2157" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ReconnectionDenied_To_RescheduleReconnection_di" bpmnElement="Flow_ReconnectionDenied_To_RescheduleReconnection">
+        <di:waypoint x="2343" y="210" />
+        <di:waypoint x="2425" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RescheduleReconnection_To_WaitBeforeRetry_di" bpmnElement="Flow_RescheduleReconnection_To_WaitBeforeRetry">
+        <di:waypoint x="2525" y="210" />
+        <di:waypoint x="2607" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitBeforeRetry_To_RequestReconnection_di" bpmnElement="Flow_WaitBeforeRetry_To_RequestReconnection">
+        <di:waypoint x="2625" y="228" />
+        <di:waypoint x="2625" y="280" />
+        <di:waypoint x="2025" y="280" />
+        <di:waypoint x="2025" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SecureSite_To_PostShutdownJoin_di" bpmnElement="Flow_SecureSite_To_PostShutdownJoin">
+        <di:waypoint x="1475" y="350" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ReconnectionTimeout_To_CallDispatcher_di" bpmnElement="Flow_ReconnectionTimeout_To_CallDispatcher">
+        <di:waypoint x="2343" y="350" />
+        <di:waypoint x="2425" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CallDispatcher_To_RequestReconnection_di" bpmnElement="Flow_CallDispatcher_To_RequestReconnection">
+        <di:waypoint x="2475" y="390" />
+        <di:waypoint x="2475" y="420" />
+        <di:waypoint x="2025" y="420" />
+        <di:waypoint x="2025" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_SubProcessStart_di" bpmnElement="StartEvent_SubProcessStart">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_Diagnostics_di" bpmnElement="Activity_Diagnostics">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_SparePartNeeded_di" bpmnElement="Gateway_SparePartNeeded" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_Correction_di" bpmnElement="Activity_Correction">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_FunctionalityTest_di" bpmnElement="Activity_FunctionalityTest">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_DeviceOk_di" bpmnElement="Gateway_DeviceOk" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_SubProcessEnd_di" bpmnElement="EndEvent_SubProcessEnd">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_WaitForSparePart_di" bpmnElement="Gateway_WaitForSparePart">
+        <dc:Bounds x="500" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_SparePartArrived_di" bpmnElement="Event_SparePartArrived">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_ReplacePart_di" bpmnElement="Activity_ReplacePart">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_SparePartDelayed_di" bpmnElement="Event_SparePartDelayed">
+        <dc:Bounds x="657" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_ChaseSparePart_di" bpmnElement="Activity_ChaseSparePart">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_SubStart_To_Diagnostics_di" bpmnElement="Flow_SubStart_To_Diagnostics">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Diagnostics_To_SparePartNeeded_di" bpmnElement="Flow_Diagnostics_To_SparePartNeeded">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SparePartNeeded_No_To_Correction_di" bpmnElement="Flow_SparePartNeeded_No_To_Correction">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SparePartNeeded_Yes_To_WaitForSparePart_di" bpmnElement="Flow_SparePartNeeded_Yes_To_WaitForSparePart">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="500" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Correction_To_FunctionalityTest_di" bpmnElement="Flow_Correction_To_FunctionalityTest">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FunctionalityTest_To_DeviceOk_di" bpmnElement="Flow_FunctionalityTest_To_DeviceOk">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_DeviceOk_Yes_To_SubProcessEnd_di" bpmnElement="Flow_DeviceOk_Yes_To_SubProcessEnd">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_DeviceOk_No_To_Correction_di" bpmnElement="Flow_DeviceOk_No_To_Correction">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitForSparePart_To_SparePartArrived_di" bpmnElement="Flow_WaitForSparePart_To_SparePartArrived">
+        <di:waypoint x="550" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitForSparePart_To_SparePartDelayed_di" bpmnElement="Flow_WaitForSparePart_To_SparePartDelayed">
+        <di:waypoint x="525" y="235" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="657" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SparePartArrived_To_ReplacePart_di" bpmnElement="Flow_SparePartArrived_To_ReplacePart">
+        <di:waypoint x="693" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ReplacePart_To_Correction_di" bpmnElement="Flow_ReplacePart_To_Correction">
+        <di:waypoint x="825" y="250" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="525" y="280" />
+        <di:waypoint x="525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SparePartDelayed_To_ChaseSparePart_di" bpmnElement="Flow_SparePartDelayed_To_ChaseSparePart">
+        <di:waypoint x="693" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ChaseSparePart_To_WaitForSparePart_di" bpmnElement="Flow_ChaseSparePart_To_WaitForSparePart">
+        <di:waypoint x="825" y="390" />
+        <di:waypoint x="825" y="420" />
+        <di:waypoint x="525" y="420" />
+        <di:waypoint x="525" y="235" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

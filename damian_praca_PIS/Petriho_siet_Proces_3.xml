@@ -1,0 +1,1283 @@
+<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://petriflow.com/petriflow.schema.xsd">
+	<id>ve_proces3_porucha</id>
+	<version>1.0.0</version>
+	<initials>VE3</initials>
+	<title>Proces 3 - Riešenie poruchy a obnovenie prevádzky</title>
+	<icon>device_hub</icon>
+	<defaultRole>true</defaultRole>
+	<anonymousRole>true</anonymousRole>
+	<transitionRole>false</transitionRole>
+
+	<data type="enumeration_map">
+		<id>criticality</id>
+		<title>Kritickosť poruchy</title>
+		<options>
+			<option key="critical">Kritická</option>
+			<option key="noncritical">Nekritická</option>
+		</options>
+	</data>
+	<data type="taskRef">
+		<id>taskref_startup</id>
+		<title>Referenčná úloha</title>
+		<desc>TaskRef na úlohu z iného procesu</desc>
+		<component>
+			<name>Spusť generátor (RS)</name>
+		</component>
+	</data>
+
+	<transition>
+		<id>t1</id>
+		<x>250</x>
+		<y>400</y>
+		<label>Deteguj poruchu (RS)</label>
+		<dataGroup>
+			<id>t1_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t2</id>
+		<x>450</x>
+		<y>400</y>
+		<label>Zaznamenaj hlásenie (RS)</label>
+		<dataGroup>
+			<id>t2_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t3</id>
+		<x>650</x>
+		<y>400</y>
+		<label>Zhromaždi diagnostické údaje (RS)</label>
+		<dataGroup>
+			<id>t3_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t4</id>
+		<x>850</x>
+		<y>400</y>
+		<label>Vyhodnoť situáciu (O)</label>
+		<dataGroup>
+			<id>t4_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<!-- XOR: kritická vs nekritická -->
+	<transition>
+		<id>t5</id>
+		<x>1050</x>
+		<y>300</y>
+		<label>Porucha kritická (O)</label>
+		<dataGroup>
+			<id>t5_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t6</id>
+		<x>1050</x>
+		<y>500</y>
+		<label>Porucha nekritická (O)</label>
+		<dataGroup>
+			<id>t6_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<transition>
+		<id>t7</id>
+		<x>1250</x>
+		<y>300</y>
+		<label>Núdzové zastavenie (RS)</label>
+		<dataGroup>
+			<id>t7_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t8</id>
+		<x>1250</x>
+		<y>500</y>
+		<label>Plánované odstavenie (O)</label>
+		<dataGroup>
+			<id>t8_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<!-- AND split po odstavení -->
+	<transition>
+		<id>t9</id>
+		<x>1450</x>
+		<y>400</y>
+		<label>Príprava servisu (AND split) (RS)</label>
+		<dataGroup>
+			<id>t9_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t10</id>
+		<x>1650</x>
+		<y>300</y>
+		<label>Vytvor servisnú úlohu (RS)</label>
+		<dataGroup>
+			<id>t10_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t11</id>
+		<x>1650</x>
+		<y>400</y>
+		<label>Informuj DDS o odstávke (RS)</label>
+		<dataGroup>
+			<id>t11_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t12</id>
+		<x>1850</x>
+		<y>400</y>
+		<label>Zaeviduj odstávku (DDS)</label>
+		<dataGroup>
+			<id>t12_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t13</id>
+		<x>1650</x>
+		<y>500</y>
+		<label>Zabezpeč prístup a bezpečnosť (O)</label>
+		<dataGroup>
+			<id>t13_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t14</id>
+		<x>2050</x>
+		<y>400</y>
+		<label>Servis pripravený (AND join) (RS)</label>
+		<dataGroup>
+			<id>t14_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<!-- Diagnostika a oprava -->
+	<transition>
+		<id>t15</id>
+		<x>2250</x>
+		<y>400</y>
+		<label>Diagnostika na mieste (ST)</label>
+		<dataGroup>
+			<id>t15_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<!-- XOR: diel treba / netreba -->
+	<transition>
+		<id>t16</id>
+		<x>2450</x>
+		<y>340</y>
+		<label>Náhradný diel netreba (ST)</label>
+		<dataGroup>
+			<id>t16_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t17</id>
+		<x>2450</x>
+		<y>460</y>
+		<label>Náhradný diel treba (ST)</label>
+		<dataGroup>
+			<id>t17_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<!-- Event-based XOR: diel doručený / meškanie -->
+	<transition>
+		<id>t18</id>
+		<x>2650</x>
+		<y>420</y>
+		<label>Diel doručený (ST)</label>
+		<dataGroup>
+			<id>t18_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t19</id>
+		<x>2650</x>
+		<y>520</y>
+		<label>Dodávka mešká (timer) (ST)</label>
+		<dataGroup>
+			<id>t19_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t20</id>
+		<x>2850</x>
+		<y>520</y>
+		<label>Urgencia dodávky dielu (ST)</label>
+		<dataGroup>
+			<id>t20_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<transition>
+		<id>t21</id>
+		<x>2850</x>
+		<y>420</y>
+		<label>Vymeň náhradný diel (ST)</label>
+		<dataGroup>
+			<id>t21_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t22</id>
+		<x>3050</x>
+		<y>380</y>
+		<label>Oprava/kalibrácia (ST)</label>
+		<dataGroup>
+			<id>t22_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t23</id>
+		<x>3250</x>
+		<y>380</y>
+		<label>Test funkčnosti (ST)</label>
+		<dataGroup>
+			<id>t23_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<!-- XOR: zariadenie OK / nie OK -->
+	<transition>
+		<id>t24</id>
+		<x>3450</x>
+		<y>320</y>
+		<label>Zariadenie OK (ST)</label>
+		<dataGroup>
+			<id>t24_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t25</id>
+		<x>3450</x>
+		<y>440</y>
+		<label>Zariadenie nie OK (ST)</label>
+		<dataGroup>
+			<id>t25_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<!-- Reconnection: event-based XOR -->
+	<transition>
+		<id>t26</id>
+		<x>3650</x>
+		<y>320</y>
+		<label>Požiadaj o opätovné pripojenie (RS)</label>
+		<dataGroup>
+			<id>t26_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t27</id>
+		<x>3850</x>
+		<y>240</y>
+		<label>Schválené pripojenie (DDS)</label>
+		<dataGroup>
+			<id>t27_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t28</id>
+		<x>3850</x>
+		<y>340</y>
+		<label>Zamietnuté pripojenie (DDS)</label>
+		<dataGroup>
+			<id>t28_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t29</id>
+		<x>3850</x>
+		<y>440</y>
+		<label>Timeout odpovede (RS)</label>
+		<dataGroup>
+			<id>t29_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<transition>
+		<id>t30</id>
+		<x>4050</x>
+		<y>340</y>
+		<label>Naplánuj opätovnú žiadosť (O)</label>
+		<dataGroup>
+			<id>t30_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t31</id>
+		<x>4250</x>
+		<y>340</y>
+		<label>Počkaj pred opakovaním (timer) (RS)</label>
+		<dataGroup>
+			<id>t31_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t32</id>
+		<x>4050</x>
+		<y>440</y>
+		<label>Kontaktuj DDS (O)</label>
+		<dataGroup>
+			<id>t32_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<transition>
+		<id>t33</id>
+		<x>4050</x>
+		<y>240</y>
+		<label>Opätovne spusti výrobu (RS)</label>
+		<dataGroup>
+			<id>t33_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+	<transition>
+		<id>t34</id>
+		<x>4250</x>
+		<y>240</y>
+		<label>Odošli oznámenie o obnovení (DDS)</label>
+		<dataGroup>
+			<id>t34_0</id>
+			<cols>4</cols>
+			<layout>grid</layout>
+		</dataGroup>
+	</transition>
+
+	<place>
+		<id>P0</id>
+		<x>150</x>
+		<y>400</y>
+		<label>Porucha nahlásená (štart)</label>
+		<tokens>1</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P1</id>
+		<x>350</x>
+		<y>400</y>
+		<label>Porucha detegovaná</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P2</id>
+		<x>550</x>
+		<y>400</y>
+		<label>Hlásenie zaznamenané</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P3</id>
+		<x>750</x>
+		<y>400</y>
+		<label>Diagnostické údaje pripravené</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P4</id>
+		<x>950</x>
+		<y>400</y>
+		<label>Kritickosť rozhodnutá (XOR split)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P5C</id>
+		<x>1150</x>
+		<y>300</y>
+		<label>Kritická porucha</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P5N</id>
+		<x>1150</x>
+		<y>500</y>
+		<label>Nekritická porucha</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P6</id>
+		<x>1350</x>
+		<y>400</y>
+		<label>Turbína odstavená</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+
+	<place>
+		<id>P7</id>
+		<x>1550</x>
+		<y>300</y>
+		<label>Servisná úloha (pending)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P8</id>
+		<x>1550</x>
+		<y>400</y>
+		<label>Odstávka nahlásená (pending)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P9</id>
+		<x>1550</x>
+		<y>500</y>
+		<label>Prístup zabezpečený (pending)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P7_OK</id>
+		<x>1750</x>
+		<y>300</y>
+		<label>Servisná úloha vytvorená</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P8_SENT</id>
+		<x>1750</x>
+		<y>400</y>
+		<label>DDS informovaná</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P8_OK</id>
+		<x>1950</x>
+		<y>400</y>
+		<label>Odstávka zaevidovaná</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P9_OK</id>
+		<x>1750</x>
+		<y>500</y>
+		<label>Prístup a bezpečnosť OK</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P10</id>
+		<x>2150</x>
+		<y>400</y>
+		<label>Servis pripravený</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+
+	<place>
+		<id>P11</id>
+		<x>2350</x>
+		<y>400</y>
+		<label>Diagnostika hotová (XOR split)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_REPAIR</id>
+		<x>2650</x>
+		<y>340</y>
+		<label>Oprava (pending)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_WAIT_PART</id>
+		<x>2650</x>
+		<y>460</y>
+		<label>Čakaj na diel (XOR split)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_REPLACE</id>
+		<x>2850</x>
+		<y>420</y>
+		<label>Výmena dielu (pending)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_TEST</id>
+		<x>3150</x>
+		<y>380</y>
+		<label>Test (pending)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_TESTED</id>
+		<x>3350</x>
+		<y>380</y>
+		<label>Test vykonaný (XOR split)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_OK</id>
+		<x>3550</x>
+		<y>320</y>
+		<label>Zariadenie OK</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+
+	<place>
+		<id>P_RECONN</id>
+		<x>3750</x>
+		<y>320</y>
+		<label>Čakaj na odpoveď DDS (XOR split)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_APPROVED</id>
+		<x>3950</x>
+		<y>240</y>
+		<label>Pripojenie schválené</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_DENIED</id>
+		<x>3950</x>
+		<y>340</y>
+		<label>Pripojenie zamietnuté</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_TIMEOUT</id>
+		<x>3950</x>
+		<y>440</y>
+		<label>Timeout odpovede</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+
+	<place>
+		<id>P_RETRY</id>
+		<x>4150</x>
+		<y>340</y>
+		<label>Opakovať žiadosť</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_CALL</id>
+		<x>4150</x>
+		<y>440</y>
+		<label>Kontaktovať DDS</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+
+	<place>
+		<id>P_STARTED</id>
+		<x>4150</x>
+		<y>240</y>
+		<label>Výroba obnovená</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+	<place>
+		<id>P_END</id>
+		<x>4350</x>
+		<y>240</y>
+		<label>Koniec (obnovené)</label>
+		<tokens>0</tokens>
+		<static>false</static>
+	</place>
+
+	<!-- Arcs -->
+	<arc>
+		<id>a1</id>
+		<type>regular</type>
+		<sourceId>P0</sourceId>
+		<destinationId>t1</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a2</id>
+		<type>regular</type>
+		<sourceId>t1</sourceId>
+		<destinationId>P1</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a3</id>
+		<type>regular</type>
+		<sourceId>P1</sourceId>
+		<destinationId>t2</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a4</id>
+		<type>regular</type>
+		<sourceId>t2</sourceId>
+		<destinationId>P2</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a5</id>
+		<type>regular</type>
+		<sourceId>P2</sourceId>
+		<destinationId>t3</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a6</id>
+		<type>regular</type>
+		<sourceId>t3</sourceId>
+		<destinationId>P3</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a7</id>
+		<type>regular</type>
+		<sourceId>P3</sourceId>
+		<destinationId>t4</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a8</id>
+		<type>regular</type>
+		<sourceId>t4</sourceId>
+		<destinationId>P4</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<!-- XOR kritickosť -->
+	<arc>
+		<id>a9</id>
+		<type>regular</type>
+		<sourceId>P4</sourceId>
+		<destinationId>t5</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>1000</x>
+			<y>400</y>
+		</breakpoint>
+		<breakpoint>
+			<x>1000</x>
+			<y>300</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a10</id>
+		<type>regular</type>
+		<sourceId>t5</sourceId>
+		<destinationId>P5C</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a11</id>
+		<type>regular</type>
+		<sourceId>P4</sourceId>
+		<destinationId>t6</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>1000</x>
+			<y>400</y>
+		</breakpoint>
+		<breakpoint>
+			<x>1000</x>
+			<y>500</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a12</id>
+		<type>regular</type>
+		<sourceId>t6</sourceId>
+		<destinationId>P5N</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<!-- Shutdown merge -->
+	<arc>
+		<id>a13</id>
+		<type>regular</type>
+		<sourceId>P5C</sourceId>
+		<destinationId>t7</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a14</id>
+		<type>regular</type>
+		<sourceId>P5N</sourceId>
+		<destinationId>t8</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a15</id>
+		<type>regular</type>
+		<sourceId>t7</sourceId>
+		<destinationId>P6</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a16</id>
+		<type>regular</type>
+		<sourceId>t8</sourceId>
+		<destinationId>P6</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<!-- AND split -->
+	<arc>
+		<id>a17</id>
+		<type>regular</type>
+		<sourceId>P6</sourceId>
+		<destinationId>t9</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a18</id>
+		<type>regular</type>
+		<sourceId>t9</sourceId>
+		<destinationId>P7</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a19</id>
+		<type>regular</type>
+		<sourceId>t9</sourceId>
+		<destinationId>P8</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a20</id>
+		<type>regular</type>
+		<sourceId>t9</sourceId>
+		<destinationId>P9</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a21</id>
+		<type>regular</type>
+		<sourceId>P7</sourceId>
+		<destinationId>t10</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a22</id>
+		<type>regular</type>
+		<sourceId>t10</sourceId>
+		<destinationId>P7_OK</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a23</id>
+		<type>regular</type>
+		<sourceId>P8</sourceId>
+		<destinationId>t11</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a24</id>
+		<type>regular</type>
+		<sourceId>t11</sourceId>
+		<destinationId>P8_SENT</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a25</id>
+		<type>regular</type>
+		<sourceId>P8_SENT</sourceId>
+		<destinationId>t12</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a26</id>
+		<type>regular</type>
+		<sourceId>t12</sourceId>
+		<destinationId>P8_OK</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a27</id>
+		<type>regular</type>
+		<sourceId>P9</sourceId>
+		<destinationId>t13</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a28</id>
+		<type>regular</type>
+		<sourceId>t13</sourceId>
+		<destinationId>P9_OK</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a29</id>
+		<type>regular</type>
+		<sourceId>P7_OK</sourceId>
+		<destinationId>t14</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a30</id>
+		<type>regular</type>
+		<sourceId>P8_OK</sourceId>
+		<destinationId>t14</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a31</id>
+		<type>regular</type>
+		<sourceId>P9_OK</sourceId>
+		<destinationId>t14</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a32</id>
+		<type>regular</type>
+		<sourceId>t14</sourceId>
+		<destinationId>P10</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<!-- Repair flow -->
+	<arc>
+		<id>a33</id>
+		<type>regular</type>
+		<sourceId>P10</sourceId>
+		<destinationId>t15</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a34</id>
+		<type>regular</type>
+		<sourceId>t15</sourceId>
+		<destinationId>P11</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a35</id>
+		<type>regular</type>
+		<sourceId>P11</sourceId>
+		<destinationId>t16</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>2400</x>
+			<y>400</y>
+		</breakpoint>
+		<breakpoint>
+			<x>2400</x>
+			<y>340</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a36</id>
+		<type>regular</type>
+		<sourceId>t16</sourceId>
+		<destinationId>P_REPAIR</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a37</id>
+		<type>regular</type>
+		<sourceId>P11</sourceId>
+		<destinationId>t17</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>2400</x>
+			<y>400</y>
+		</breakpoint>
+		<breakpoint>
+			<x>2400</x>
+			<y>460</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a38</id>
+		<type>regular</type>
+		<sourceId>t17</sourceId>
+		<destinationId>P_WAIT_PART</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<!-- Čakanie na diel -->
+	<arc>
+		<id>a39</id>
+		<type>regular</type>
+		<sourceId>P_WAIT_PART</sourceId>
+		<destinationId>t18</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>2600</x>
+			<y>460</y>
+		</breakpoint>
+		<breakpoint>
+			<x>2600</x>
+			<y>420</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a40</id>
+		<type>regular</type>
+		<sourceId>t18</sourceId>
+		<destinationId>P_REPLACE</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a41</id>
+		<type>regular</type>
+		<sourceId>P_WAIT_PART</sourceId>
+		<destinationId>t19</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>2600</x>
+			<y>460</y>
+		</breakpoint>
+		<breakpoint>
+			<x>2600</x>
+			<y>520</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a42</id>
+		<type>regular</type>
+		<sourceId>t19</sourceId>
+		<destinationId>P_WAIT_PART</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a43</id>
+		<type>regular</type>
+		<sourceId>P_WAIT_PART</sourceId>
+		<destinationId>t20</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a44</id>
+		<type>regular</type>
+		<sourceId>t20</sourceId>
+		<destinationId>P_WAIT_PART</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a45</id>
+		<type>regular</type>
+		<sourceId>P_REPLACE</sourceId>
+		<destinationId>t21</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a46</id>
+		<type>regular</type>
+		<sourceId>t21</sourceId>
+		<destinationId>P_REPAIR</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a47</id>
+		<type>regular</type>
+		<sourceId>P_REPAIR</sourceId>
+		<destinationId>t22</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a48</id>
+		<type>regular</type>
+		<sourceId>t22</sourceId>
+		<destinationId>P_TEST</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a49</id>
+		<type>regular</type>
+		<sourceId>P_TEST</sourceId>
+		<destinationId>t23</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a50</id>
+		<type>regular</type>
+		<sourceId>t23</sourceId>
+		<destinationId>P_TESTED</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<!-- XOR OK / nie OK -->
+	<arc>
+		<id>a51</id>
+		<type>regular</type>
+		<sourceId>P_TESTED</sourceId>
+		<destinationId>t24</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>3400</x>
+			<y>380</y>
+		</breakpoint>
+		<breakpoint>
+			<x>3400</x>
+			<y>320</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a52</id>
+		<type>regular</type>
+		<sourceId>t24</sourceId>
+		<destinationId>P_OK</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a53</id>
+		<type>regular</type>
+		<sourceId>P_TESTED</sourceId>
+		<destinationId>t25</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>3400</x>
+			<y>380</y>
+		</breakpoint>
+		<breakpoint>
+			<x>3400</x>
+			<y>440</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a54</id>
+		<type>regular</type>
+		<sourceId>t25</sourceId>
+		<destinationId>P_REPAIR</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<!-- Reconnection -->
+	<arc>
+		<id>a55</id>
+		<type>regular</type>
+		<sourceId>P_OK</sourceId>
+		<destinationId>t26</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a56</id>
+		<type>regular</type>
+		<sourceId>t26</sourceId>
+		<destinationId>P_RECONN</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a57</id>
+		<type>regular</type>
+		<sourceId>P_RECONN</sourceId>
+		<destinationId>t27</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>3800</x>
+			<y>320</y>
+		</breakpoint>
+		<breakpoint>
+			<x>3800</x>
+			<y>240</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a58</id>
+		<type>regular</type>
+		<sourceId>t27</sourceId>
+		<destinationId>P_APPROVED</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a59</id>
+		<type>regular</type>
+		<sourceId>P_RECONN</sourceId>
+		<destinationId>t28</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a60</id>
+		<type>regular</type>
+		<sourceId>t28</sourceId>
+		<destinationId>P_DENIED</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a61</id>
+		<type>regular</type>
+		<sourceId>P_RECONN</sourceId>
+		<destinationId>t29</destinationId>
+		<multiplicity>1</multiplicity>
+		<breakpoint>
+			<x>3800</x>
+			<y>320</y>
+		</breakpoint>
+		<breakpoint>
+			<x>3800</x>
+			<y>440</y>
+		</breakpoint>
+	</arc>
+	<arc>
+		<id>a62</id>
+		<type>regular</type>
+		<sourceId>t29</sourceId>
+		<destinationId>P_TIMEOUT</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a63</id>
+		<type>regular</type>
+		<sourceId>P_DENIED</sourceId>
+		<destinationId>t30</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a64</id>
+		<type>regular</type>
+		<sourceId>t30</sourceId>
+		<destinationId>P_RETRY</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a65</id>
+		<type>regular</type>
+		<sourceId>P_RETRY</sourceId>
+		<destinationId>t31</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a66</id>
+		<type>regular</type>
+		<sourceId>t31</sourceId>
+		<destinationId>P_OK</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a67</id>
+		<type>regular</type>
+		<sourceId>P_TIMEOUT</sourceId>
+		<destinationId>t32</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a68</id>
+		<type>regular</type>
+		<sourceId>t32</sourceId>
+		<destinationId>P_OK</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+
+	<arc>
+		<id>a69</id>
+		<type>regular</type>
+		<sourceId>P_APPROVED</sourceId>
+		<destinationId>t33</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a70</id>
+		<type>regular</type>
+		<sourceId>t33</sourceId>
+		<destinationId>P_STARTED</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a71</id>
+		<type>regular</type>
+		<sourceId>P_STARTED</sourceId>
+		<destinationId>t34</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+	<arc>
+		<id>a72</id>
+		<type>regular</type>
+		<sourceId>t34</sourceId>
+		<destinationId>P_END</destinationId>
+		<multiplicity>1</multiplicity>
+	</arc>
+</document>

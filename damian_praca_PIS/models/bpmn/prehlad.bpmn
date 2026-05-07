@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  id="Definitions_Prehled"
+  targetNamespace="http://bpmn.io/schema/bpmn"
+  exporter="bpmn-js (https://demo.bpmn.io)"
+  exporterVersion="18.6.1">
+  <bpmn:collaboration id="Collaboration_Overview" name="Prehľadový procesný model">
+    <bpmn:participant id="Participant_Proces1" name="Proces 1 – Spustenie výroby elektriny" />
+    <bpmn:participant id="Participant_Proces2" name="Proces 2 – Monitorovanie a regulácia prevádzky" />
+    <bpmn:participant id="Participant_Proces3" name="Proces 3 – Riešenie poruchy a obnovenie prevádzky" />
+
+    <bpmn:messageFlow id="MessageFlow_1_to_2" name="Výroba spustená" sourceRef="Participant_Proces1" targetRef="Participant_Proces2" />
+    <bpmn:messageFlow id="MessageFlow_2_to_3" name="Závažná odchýlka/porucha" sourceRef="Participant_Proces2" targetRef="Participant_Proces3" />
+    <bpmn:messageFlow id="MessageFlow_3_to_2" name="Prevádzka obnovená" sourceRef="Participant_Proces3" targetRef="Participant_Proces2" />
+  </bpmn:collaboration>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Overview">
+    <bpmndi:BPMNPlane id="BPMNPlane_Overview" bpmnElement="Collaboration_Overview">
+      <bpmndi:BPMNShape id="Participant_Proces1_di" bpmnElement="Participant_Proces1" isHorizontal="true">
+        <dc:Bounds x="160" y="140" width="720" height="110" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_Proces2_di" bpmnElement="Participant_Proces2" isHorizontal="true">
+        <dc:Bounds x="160" y="300" width="720" height="110" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_Proces3_di" bpmnElement="Participant_Proces3" isHorizontal="true">
+        <dc:Bounds x="160" y="460" width="720" height="110" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="MessageFlow_1_to_2_di" bpmnElement="MessageFlow_1_to_2">
+        <di:waypoint x="880" y="195" />
+        <di:waypoint x="940" y="195" />
+        <di:waypoint x="940" y="355" />
+        <di:waypoint x="880" y="355" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="MessageFlow_2_to_3_di" bpmnElement="MessageFlow_2_to_3">
+        <di:waypoint x="880" y="355" />
+        <di:waypoint x="940" y="355" />
+        <di:waypoint x="940" y="515" />
+        <di:waypoint x="880" y="515" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="MessageFlow_3_to_2_di" bpmnElement="MessageFlow_3_to_2">
+        <di:waypoint x="160" y="515" />
+        <di:waypoint x="100" y="515" />
+        <di:waypoint x="100" y="355" />
+        <di:waypoint x="160" y="355" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

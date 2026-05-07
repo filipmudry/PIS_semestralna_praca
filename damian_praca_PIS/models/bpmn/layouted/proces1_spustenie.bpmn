@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_Proces1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.6.1">
+  <bpmn:message id="Message_GridApproved" name="Povolenie pripojenia udelené" />
+  <bpmn:message id="Message_GridDenied" name="Povolenie pripojenia zamietnuté" />
+  <bpmn:message id="Message_ProductionStarted" name="Výroba spustená" />
+  <bpmn:process id="Process_StartProduction" name="Proces 1 – Spustenie výroby elektriny" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Proces1">
+      <bpmn:lane id="Lane_ControlSystem" name="Riadiaci systém">
+        <bpmn:flowNodeRef>StartEvent_Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_GetWindData</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_GetForecast</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_EvaluateStartConditions</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_WindOk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_WaitForWind</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_TechnicalCheck</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PreStartSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_SafetyCheck</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_CalibrateSensors</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PreStartJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_AllChecksOk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_RequestGridPermission</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_WaitGridResponse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_GridApproved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_GridDenied</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_GridTimeout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_TurbineSetupSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_YawAlignment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_PitchSetting</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_StartAuxSystems</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_TurbineSetupJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_StartGenerator</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_RampUp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_PostStartCheck</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PostStartOk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Terminated</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Aborted</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Operator" name="Operátor elektrárne">
+        <bpmn:flowNodeRef>Activity_LaunchConfirmation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_ProductionStarted</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Dispatcher" name="Dispečer distribučnej siete">
+        <bpmn:flowNodeRef>Activity_NetworkConnectionCheck</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_Start" name="Spustenie iniciované">
+      <bpmn:outgoing>Flow_Start_To_GetWindData</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_GetWindData" name="Získaj údaje o vetre">
+      <bpmn:incoming>Flow_Start_To_GetWindData</bpmn:incoming>
+      <bpmn:outgoing>Flow_GetWindData_To_GetForecast</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_GetForecast" name="Získaj krátkodobú predpoveď">
+      <bpmn:incoming>Flow_GetWindData_To_GetForecast</bpmn:incoming>
+      <bpmn:outgoing>Flow_GetForecast_To_EvaluateConditions</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:businessRuleTask id="Activity_EvaluateStartConditions" name="Vyhodnoť štartovacie podmienky">
+      <bpmn:incoming>Flow_GetForecast_To_EvaluateConditions</bpmn:incoming>
+      <bpmn:outgoing>Flow_EvaluateConditions_To_WindOk</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="Gateway_WindOk" name="Vietor vhodný?">
+      <bpmn:incoming>Flow_EvaluateConditions_To_WindOk</bpmn:incoming>
+      <bpmn:outgoing>Flow_WindOk_Yes_To_TechnicalCheck</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WindOk_No_To_WaitForWind</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="Event_WaitForWind" name="Čakať na vhodný vietor">
+      <bpmn:incoming>Flow_WindOk_No_To_WaitForWind</bpmn:incoming>
+      <bpmn:outgoing>Flow_WaitForWind_To_GetWindData</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="Activity_TechnicalCheck" name="Skontroluj technický stav turbíny">
+      <bpmn:incoming>Flow_WindOk_Yes_To_TechnicalCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_TechnicalCheck_To_PreStartSplit</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gateway_PreStartSplit" name="Príprava na spustenie">
+      <bpmn:incoming>Flow_TechnicalCheck_To_PreStartSplit</bpmn:incoming>
+      <bpmn:outgoing>Flow_PreStartSplit_To_SafetyCheck</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PreStartSplit_To_CalibrateSensors</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PreStartSplit_To_NetworkCheck</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Activity_SafetyCheck" name="Skontroluj bezpečnostné limity">
+      <bpmn:incoming>Flow_PreStartSplit_To_SafetyCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_SafetyCheck_To_PreStartJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_CalibrateSensors" name="Kalibruj senzory">
+      <bpmn:incoming>Flow_PreStartSplit_To_CalibrateSensors</bpmn:incoming>
+      <bpmn:outgoing>Flow_CalibrateSensors_To_PreStartJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_NetworkConnectionCheck" name="Over pripojenie do siete">
+      <bpmn:incoming>Flow_PreStartSplit_To_NetworkCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_NetworkCheck_To_PreStartJoin</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Gateway_PreStartJoin" name="Príprava dokončená">
+      <bpmn:incoming>Flow_SafetyCheck_To_PreStartJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_CalibrateSensors_To_PreStartJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_NetworkCheck_To_PreStartJoin</bpmn:incoming>
+      <bpmn:outgoing>Flow_PreStartJoin_To_AllChecksOk</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="Gateway_AllChecksOk" name="Všetky kontroly OK?">
+      <bpmn:incoming>Flow_PreStartJoin_To_AllChecksOk</bpmn:incoming>
+      <bpmn:outgoing>Flow_AllChecksOk_Yes_To_RequestGridPermission</bpmn:outgoing>
+      <bpmn:outgoing>Flow_AllChecksOk_No_To_Aborted</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="Activity_RequestGridPermission" name="Požiadaj o povolenie pripojenia">
+      <bpmn:incoming>Flow_AllChecksOk_Yes_To_RequestGridPermission</bpmn:incoming>
+      <bpmn:outgoing>Flow_RequestGridPermission_To_WaitGridResponse</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:eventBasedGateway id="Gateway_WaitGridResponse" name="Čakaj na odpoveď">
+      <bpmn:incoming>Flow_RequestGridPermission_To_WaitGridResponse</bpmn:incoming>
+      <bpmn:outgoing>Flow_WaitGridResponse_To_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WaitGridResponse_To_Denied</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WaitGridResponse_To_Timeout</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_GridApproved" name="Povolenie udelené">
+      <bpmn:incoming>Flow_WaitGridResponse_To_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved_To_TurbineSetupSplit</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_GridApproved" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_GridDenied" name="Povolenie zamietnuté">
+      <bpmn:incoming>Flow_WaitGridResponse_To_Denied</bpmn:incoming>
+      <bpmn:outgoing>Flow_Denied_To_Terminated</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_GridDenied" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_GridTimeout" name="Časový limit">
+      <bpmn:incoming>Flow_WaitGridResponse_To_Timeout</bpmn:incoming>
+      <bpmn:outgoing>Flow_Timeout_To_Terminated</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT2M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="Gateway_TurbineSetupSplit" name="Nastavenie turbíny">
+      <bpmn:incoming>Flow_Approved_To_TurbineSetupSplit</bpmn:incoming>
+      <bpmn:outgoing>Flow_TurbineSetupSplit_To_Yaw</bpmn:outgoing>
+      <bpmn:outgoing>Flow_TurbineSetupSplit_To_Pitch</bpmn:outgoing>
+      <bpmn:outgoing>Flow_TurbineSetupSplit_To_Aux</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Activity_YawAlignment" name="Natoč gondolu (yaw)">
+      <bpmn:incoming>Flow_TurbineSetupSplit_To_Yaw</bpmn:incoming>
+      <bpmn:outgoing>Flow_Yaw_To_TurbineSetupJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_PitchSetting" name="Nastav uhol lopatiek (pitch)">
+      <bpmn:incoming>Flow_TurbineSetupSplit_To_Pitch</bpmn:incoming>
+      <bpmn:outgoing>Flow_Pitch_To_TurbineSetupJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_StartAuxSystems" name="Spusť pomocné systémy">
+      <bpmn:incoming>Flow_TurbineSetupSplit_To_Aux</bpmn:incoming>
+      <bpmn:outgoing>Flow_Aux_To_TurbineSetupJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gateway_TurbineSetupJoin" name="Turbína pripravená">
+      <bpmn:incoming>Flow_Yaw_To_TurbineSetupJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_Pitch_To_TurbineSetupJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_Aux_To_TurbineSetupJoin</bpmn:incoming>
+      <bpmn:outgoing>Flow_TurbineSetupJoin_To_StartGenerator</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Activity_StartGenerator" name="Spusť generátor">
+      <bpmn:incoming>Flow_TurbineSetupJoin_To_StartGenerator</bpmn:incoming>
+      <bpmn:outgoing>Flow_StartGenerator_To_RampUp</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="Activity_RampUp" name="Postupné nabiehanie výkonu">
+      <bpmn:incoming>Flow_StartGenerator_To_RampUp</bpmn:incoming>
+      <bpmn:outgoing>Flow_RampUp_To_PostStartCheck</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="Activity_PostStartCheck" name="Kontrola po štarte">
+      <bpmn:incoming>Flow_RampUp_To_PostStartCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_PostStartCheck_To_PostStartOk</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_PostStartOk" name="Štart prebehol OK?">
+      <bpmn:incoming>Flow_PostStartCheck_To_PostStartOk</bpmn:incoming>
+      <bpmn:outgoing>Flow_PostStartOk_Yes_To_LaunchConfirmation</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PostStartOk_No_To_Aborted</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Activity_LaunchConfirmation" name="Potvrď spustenie výroby">
+      <bpmn:incoming>Flow_PostStartOk_Yes_To_LaunchConfirmation</bpmn:incoming>
+      <bpmn:outgoing>Flow_LaunchConfirmation_To_ProductionStarted</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_ProductionStarted" name="Výroba spustená">
+      <bpmn:incoming>Flow_LaunchConfirmation_To_ProductionStarted</bpmn:incoming>
+      <bpmn:messageEventDefinition messageRef="Message_ProductionStarted" />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_Terminated" name="Proces ukončený">
+      <bpmn:incoming>Flow_Denied_To_Terminated</bpmn:incoming>
+      <bpmn:incoming>Flow_Timeout_To_Terminated</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_Aborted" name="Spustenie zrušené">
+      <bpmn:incoming>Flow_AllChecksOk_No_To_Aborted</bpmn:incoming>
+      <bpmn:incoming>Flow_PostStartOk_No_To_Aborted</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:dataObject id="DataObject_WindData" />
+    <bpmn:dataObjectReference id="DataObjectReference_WindData" name="Údaje o vetre" dataObjectRef="DataObject_WindData" />
+    <bpmn:dataObject id="DataObject_Forecast" />
+    <bpmn:dataObjectReference id="DataObjectReference_Forecast" name="Predpoveď" dataObjectRef="DataObject_Forecast" />
+    <bpmn:dataObject id="DataObject_CheckReport" />
+    <bpmn:dataObjectReference id="DataObjectReference_CheckReport" name="Report kontrol" dataObjectRef="DataObject_CheckReport" />
+    <bpmn:sequenceFlow id="Flow_Start_To_GetWindData" sourceRef="StartEvent_Start" targetRef="Activity_GetWindData" />
+    <bpmn:sequenceFlow id="Flow_GetWindData_To_GetForecast" sourceRef="Activity_GetWindData" targetRef="Activity_GetForecast" />
+    <bpmn:sequenceFlow id="Flow_GetForecast_To_EvaluateConditions" sourceRef="Activity_GetForecast" targetRef="Activity_EvaluateStartConditions" />
+    <bpmn:sequenceFlow id="Flow_EvaluateConditions_To_WindOk" sourceRef="Activity_EvaluateStartConditions" targetRef="Gateway_WindOk" />
+    <bpmn:sequenceFlow id="Flow_WindOk_No_To_WaitForWind" name="Nie" sourceRef="Gateway_WindOk" targetRef="Event_WaitForWind" />
+    <bpmn:sequenceFlow id="Flow_WaitForWind_To_GetWindData" name="Opakuj" sourceRef="Event_WaitForWind" targetRef="Activity_GetWindData" />
+    <bpmn:sequenceFlow id="Flow_WindOk_Yes_To_TechnicalCheck" name="Áno" sourceRef="Gateway_WindOk" targetRef="Activity_TechnicalCheck" />
+    <bpmn:sequenceFlow id="Flow_TechnicalCheck_To_PreStartSplit" sourceRef="Activity_TechnicalCheck" targetRef="Gateway_PreStartSplit" />
+    <bpmn:sequenceFlow id="Flow_PreStartSplit_To_SafetyCheck" name="Súbežne" sourceRef="Gateway_PreStartSplit" targetRef="Activity_SafetyCheck" />
+    <bpmn:sequenceFlow id="Flow_PreStartSplit_To_CalibrateSensors" name="Súbežne" sourceRef="Gateway_PreStartSplit" targetRef="Activity_CalibrateSensors" />
+    <bpmn:sequenceFlow id="Flow_PreStartSplit_To_NetworkCheck" name="Súbežne" sourceRef="Gateway_PreStartSplit" targetRef="Activity_NetworkConnectionCheck" />
+    <bpmn:sequenceFlow id="Flow_SafetyCheck_To_PreStartJoin" sourceRef="Activity_SafetyCheck" targetRef="Gateway_PreStartJoin" />
+    <bpmn:sequenceFlow id="Flow_CalibrateSensors_To_PreStartJoin" sourceRef="Activity_CalibrateSensors" targetRef="Gateway_PreStartJoin" />
+    <bpmn:sequenceFlow id="Flow_NetworkCheck_To_PreStartJoin" sourceRef="Activity_NetworkConnectionCheck" targetRef="Gateway_PreStartJoin" />
+    <bpmn:sequenceFlow id="Flow_PreStartJoin_To_AllChecksOk" sourceRef="Gateway_PreStartJoin" targetRef="Gateway_AllChecksOk" />
+    <bpmn:sequenceFlow id="Flow_AllChecksOk_No_To_Aborted" name="Nie" sourceRef="Gateway_AllChecksOk" targetRef="EndEvent_Aborted" />
+    <bpmn:sequenceFlow id="Flow_AllChecksOk_Yes_To_RequestGridPermission" name="Áno" sourceRef="Gateway_AllChecksOk" targetRef="Activity_RequestGridPermission" />
+    <bpmn:sequenceFlow id="Flow_RequestGridPermission_To_WaitGridResponse" sourceRef="Activity_RequestGridPermission" targetRef="Gateway_WaitGridResponse" />
+    <bpmn:sequenceFlow id="Flow_WaitGridResponse_To_Approved" name="Schválené" sourceRef="Gateway_WaitGridResponse" targetRef="Event_GridApproved" />
+    <bpmn:sequenceFlow id="Flow_WaitGridResponse_To_Denied" name="Zamietnuté" sourceRef="Gateway_WaitGridResponse" targetRef="Event_GridDenied" />
+    <bpmn:sequenceFlow id="Flow_WaitGridResponse_To_Timeout" name="Timeout" sourceRef="Gateway_WaitGridResponse" targetRef="Event_GridTimeout" />
+    <bpmn:sequenceFlow id="Flow_Approved_To_TurbineSetupSplit" sourceRef="Event_GridApproved" targetRef="Gateway_TurbineSetupSplit" />
+    <bpmn:sequenceFlow id="Flow_Denied_To_Terminated" sourceRef="Event_GridDenied" targetRef="EndEvent_Terminated" />
+    <bpmn:sequenceFlow id="Flow_Timeout_To_Terminated" sourceRef="Event_GridTimeout" targetRef="EndEvent_Terminated" />
+    <bpmn:sequenceFlow id="Flow_TurbineSetupSplit_To_Yaw" name="Súbežne" sourceRef="Gateway_TurbineSetupSplit" targetRef="Activity_YawAlignment" />
+    <bpmn:sequenceFlow id="Flow_TurbineSetupSplit_To_Pitch" name="Súbežne" sourceRef="Gateway_TurbineSetupSplit" targetRef="Activity_PitchSetting" />
+    <bpmn:sequenceFlow id="Flow_TurbineSetupSplit_To_Aux" name="Súbežne" sourceRef="Gateway_TurbineSetupSplit" targetRef="Activity_StartAuxSystems" />
+    <bpmn:sequenceFlow id="Flow_Yaw_To_TurbineSetupJoin" sourceRef="Activity_YawAlignment" targetRef="Gateway_TurbineSetupJoin" />
+    <bpmn:sequenceFlow id="Flow_Pitch_To_TurbineSetupJoin" sourceRef="Activity_PitchSetting" targetRef="Gateway_TurbineSetupJoin" />
+    <bpmn:sequenceFlow id="Flow_Aux_To_TurbineSetupJoin" sourceRef="Activity_StartAuxSystems" targetRef="Gateway_TurbineSetupJoin" />
+    <bpmn:sequenceFlow id="Flow_TurbineSetupJoin_To_StartGenerator" sourceRef="Gateway_TurbineSetupJoin" targetRef="Activity_StartGenerator" />
+    <bpmn:sequenceFlow id="Flow_StartGenerator_To_RampUp" sourceRef="Activity_StartGenerator" targetRef="Activity_RampUp" />
+    <bpmn:sequenceFlow id="Flow_RampUp_To_PostStartCheck" sourceRef="Activity_RampUp" targetRef="Activity_PostStartCheck" />
+    <bpmn:sequenceFlow id="Flow_PostStartCheck_To_PostStartOk" sourceRef="Activity_PostStartCheck" targetRef="Gateway_PostStartOk" />
+    <bpmn:sequenceFlow id="Flow_PostStartOk_Yes_To_LaunchConfirmation" name="Áno" sourceRef="Gateway_PostStartOk" targetRef="Activity_LaunchConfirmation" />
+    <bpmn:sequenceFlow id="Flow_PostStartOk_No_To_Aborted" name="Nie" sourceRef="Gateway_PostStartOk" targetRef="EndEvent_Aborted" />
+    <bpmn:sequenceFlow id="Flow_LaunchConfirmation_To_ProductionStarted" sourceRef="Activity_LaunchConfirmation" targetRef="EndEvent_ProductionStarted" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_StartProduction">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_StartProduction" bpmnElement="Process_StartProduction">
+      <bpmndi:BPMNShape id="StartEvent_Start_di" bpmnElement="StartEvent_Start">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_GetWindData_di" bpmnElement="Activity_GetWindData">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_GetForecast_di" bpmnElement="Activity_GetForecast">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_EvaluateStartConditions_di" bpmnElement="Activity_EvaluateStartConditions">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_WindOk_di" bpmnElement="Gateway_WindOk" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_TechnicalCheck_di" bpmnElement="Activity_TechnicalCheck">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PreStartSplit_di" bpmnElement="Gateway_PreStartSplit">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_SafetyCheck_di" bpmnElement="Activity_SafetyCheck">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PreStartJoin_di" bpmnElement="Gateway_PreStartJoin">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_AllChecksOk_di" bpmnElement="Gateway_AllChecksOk" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RequestGridPermission_di" bpmnElement="Activity_RequestGridPermission">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_WaitGridResponse_di" bpmnElement="Gateway_WaitGridResponse">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_GridApproved_di" bpmnElement="Event_GridApproved">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_TurbineSetupSplit_di" bpmnElement="Gateway_TurbineSetupSplit">
+        <dc:Bounds x="2000" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_YawAlignment_di" bpmnElement="Activity_YawAlignment">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_TurbineSetupJoin_di" bpmnElement="Gateway_TurbineSetupJoin">
+        <dc:Bounds x="2300" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_StartGenerator_di" bpmnElement="Activity_StartGenerator">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_RampUp_di" bpmnElement="Activity_RampUp">
+        <dc:Bounds x="2575" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_PostStartCheck_di" bpmnElement="Activity_PostStartCheck">
+        <dc:Bounds x="2725" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PostStartOk_di" bpmnElement="Gateway_PostStartOk" isMarkerVisible="true">
+        <dc:Bounds x="2900" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_LaunchConfirmation_di" bpmnElement="Activity_LaunchConfirmation">
+        <dc:Bounds x="3025" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_ProductionStarted_di" bpmnElement="EndEvent_ProductionStarted">
+        <dc:Bounds x="3207" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObject_WindData_di" bpmnElement="DataObject_WindData">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_WaitForWind_di" bpmnElement="Event_WaitForWind">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_CalibrateSensors_di" bpmnElement="Activity_CalibrateSensors">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_GridDenied_di" bpmnElement="Event_GridDenied">
+        <dc:Bounds x="1857" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Terminated_di" bpmnElement="EndEvent_Terminated">
+        <dc:Bounds x="2007" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_PitchSetting_di" bpmnElement="Activity_PitchSetting">
+        <dc:Bounds x="2275" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Aborted_di" bpmnElement="EndEvent_Aborted">
+        <dc:Bounds x="3207" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_WindData_di" bpmnElement="DataObjectReference_WindData">
+        <dc:Bounds x="57" y="325" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_NetworkConnectionCheck_di" bpmnElement="Activity_NetworkConnectionCheck">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_GridTimeout_di" bpmnElement="Event_GridTimeout">
+        <dc:Bounds x="1857" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_StartAuxSystems_di" bpmnElement="Activity_StartAuxSystems">
+        <dc:Bounds x="2125" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObject_Forecast_di" bpmnElement="DataObject_Forecast">
+        <dc:Bounds x="25" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_Forecast_di" bpmnElement="DataObjectReference_Forecast">
+        <dc:Bounds x="57" y="605" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObject_CheckReport_di" bpmnElement="DataObject_CheckReport">
+        <dc:Bounds x="25" y="730" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjectReference_CheckReport_di" bpmnElement="DataObjectReference_CheckReport">
+        <dc:Bounds x="57" y="885" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_To_GetWindData_di" bpmnElement="Flow_Start_To_GetWindData">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GetWindData_To_GetForecast_di" bpmnElement="Flow_GetWindData_To_GetForecast">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GetForecast_To_EvaluateConditions_di" bpmnElement="Flow_GetForecast_To_EvaluateConditions">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_EvaluateConditions_To_WindOk_di" bpmnElement="Flow_EvaluateConditions_To_WindOk">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WindOk_Yes_To_TechnicalCheck_di" bpmnElement="Flow_WindOk_Yes_To_TechnicalCheck">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WindOk_No_To_WaitForWind_di" bpmnElement="Flow_WindOk_No_To_WaitForWind">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_TechnicalCheck_To_PreStartSplit_di" bpmnElement="Flow_TechnicalCheck_To_PreStartSplit">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PreStartSplit_To_SafetyCheck_di" bpmnElement="Flow_PreStartSplit_To_SafetyCheck">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PreStartSplit_To_CalibrateSensors_di" bpmnElement="Flow_PreStartSplit_To_CalibrateSensors">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PreStartSplit_To_NetworkCheck_di" bpmnElement="Flow_PreStartSplit_To_NetworkCheck">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SafetyCheck_To_PreStartJoin_di" bpmnElement="Flow_SafetyCheck_To_PreStartJoin">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PreStartJoin_To_AllChecksOk_di" bpmnElement="Flow_PreStartJoin_To_AllChecksOk">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_AllChecksOk_Yes_To_RequestGridPermission_di" bpmnElement="Flow_AllChecksOk_Yes_To_RequestGridPermission">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_AllChecksOk_No_To_Aborted_di" bpmnElement="Flow_AllChecksOk_No_To_Aborted">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1500" y="70" />
+        <di:waypoint x="1500" y="140" />
+        <di:waypoint x="3150" y="140" />
+        <di:waypoint x="3150" y="210" />
+        <di:waypoint x="3207" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RequestGridPermission_To_WaitGridResponse_di" bpmnElement="Flow_RequestGridPermission_To_WaitGridResponse">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitGridResponse_To_Approved_di" bpmnElement="Flow_WaitGridResponse_To_Approved">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitGridResponse_To_Denied_di" bpmnElement="Flow_WaitGridResponse_To_Denied">
+        <di:waypoint x="1725" y="95" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1857" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitGridResponse_To_Timeout_di" bpmnElement="Flow_WaitGridResponse_To_Timeout">
+        <di:waypoint x="1725" y="95" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1857" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Approved_To_TurbineSetupSplit_di" bpmnElement="Flow_Approved_To_TurbineSetupSplit">
+        <di:waypoint x="1893" y="70" />
+        <di:waypoint x="2000" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_TurbineSetupSplit_To_Yaw_di" bpmnElement="Flow_TurbineSetupSplit_To_Yaw">
+        <di:waypoint x="2050" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_TurbineSetupSplit_To_Pitch_di" bpmnElement="Flow_TurbineSetupSplit_To_Pitch">
+        <di:waypoint x="2050" y="70" />
+        <di:waypoint x="2100" y="70" />
+        <di:waypoint x="2100" y="140" />
+        <di:waypoint x="2250" y="140" />
+        <di:waypoint x="2250" y="210" />
+        <di:waypoint x="2275" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_TurbineSetupSplit_To_Aux_di" bpmnElement="Flow_TurbineSetupSplit_To_Aux">
+        <di:waypoint x="2050" y="70" />
+        <di:waypoint x="2100" y="70" />
+        <di:waypoint x="2100" y="280" />
+        <di:waypoint x="2100" y="280" />
+        <di:waypoint x="2100" y="350" />
+        <di:waypoint x="2125" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Yaw_To_TurbineSetupJoin_di" bpmnElement="Flow_Yaw_To_TurbineSetupJoin">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2300" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_TurbineSetupJoin_To_StartGenerator_di" bpmnElement="Flow_TurbineSetupJoin_To_StartGenerator">
+        <di:waypoint x="2350" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_StartGenerator_To_RampUp_di" bpmnElement="Flow_StartGenerator_To_RampUp">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2575" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RampUp_To_PostStartCheck_di" bpmnElement="Flow_RampUp_To_PostStartCheck">
+        <di:waypoint x="2675" y="70" />
+        <di:waypoint x="2725" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PostStartCheck_To_PostStartOk_di" bpmnElement="Flow_PostStartCheck_To_PostStartOk">
+        <di:waypoint x="2825" y="70" />
+        <di:waypoint x="2900" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PostStartOk_Yes_To_LaunchConfirmation_di" bpmnElement="Flow_PostStartOk_Yes_To_LaunchConfirmation">
+        <di:waypoint x="2950" y="70" />
+        <di:waypoint x="3025" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PostStartOk_No_To_Aborted_di" bpmnElement="Flow_PostStartOk_No_To_Aborted">
+        <di:waypoint x="2925" y="95" />
+        <di:waypoint x="2925" y="210" />
+        <di:waypoint x="3207" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_LaunchConfirmation_To_ProductionStarted_di" bpmnElement="Flow_LaunchConfirmation_To_ProductionStarted">
+        <di:waypoint x="3125" y="70" />
+        <di:waypoint x="3207" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WaitForWind_To_GetWindData_di" bpmnElement="Flow_WaitForWind_To_GetWindData">
+        <di:waypoint x="825" y="228" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="225" y="280" />
+        <di:waypoint x="225" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CalibrateSensors_To_PreStartJoin_di" bpmnElement="Flow_CalibrateSensors_To_PreStartJoin">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Denied_To_Terminated_di" bpmnElement="Flow_Denied_To_Terminated">
+        <di:waypoint x="1893" y="210" />
+        <di:waypoint x="2007" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Pitch_To_TurbineSetupJoin_di" bpmnElement="Flow_Pitch_To_TurbineSetupJoin">
+        <di:waypoint x="2325" y="170" />
+        <di:waypoint x="2325" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_NetworkCheck_To_PreStartJoin_di" bpmnElement="Flow_NetworkCheck_To_PreStartJoin">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Timeout_To_Terminated_di" bpmnElement="Flow_Timeout_To_Terminated">
+        <di:waypoint x="1893" y="350" />
+        <di:waypoint x="2025" y="350" />
+        <di:waypoint x="2025" y="228" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Aux_To_TurbineSetupJoin_di" bpmnElement="Flow_Aux_To_TurbineSetupJoin">
+        <di:waypoint x="2225" y="350" />
+        <di:waypoint x="2250" y="350" />
+        <di:waypoint x="2250" y="140" />
+        <di:waypoint x="2250" y="140" />
+        <di:waypoint x="2250" y="70" />
+        <di:waypoint x="2300" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
