@@ -66,8 +66,12 @@ O  & Operátor elektrárne \\
 ST  & Servisný technik \\
 \end{tabular}
 
-
-
+\newpage
+\section{Prehľadový procesný model}
+\begin{figure}[H]
+  \includegraphics[width=1\textwidth]{figs/process_model_overview.png}
+  \caption{Prehľadový procesný model}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,7 +89,7 @@ Po úspešnej kontrole technického stavu RS paralelne spúšťa dve kontroly:
     \item \textbf{overenie pripojenia do distribučnej siete}, ktoré vykonáva DDS
 \end{enumerate}
 \vspace{0.6em}
-Po dokončení oboch paralelných kontrol RS vyžiada od DDS finálne povolenie pripojenia. DDS na základe stavu siete buď povolenie udelí, zamietne (napr. pri nedostatočnej kapacite), alebo nereaguje v stanovenom časovom okne, a vtedy RS vyhodnotí timeout. V prípade zamietnutia alebo timeoutu sa proces ukončí.Po udelení povolenia RS pristupuje k samotnému nastaveniu turbíny. Paralelne vykonáva tri činnosti: natočenie gondoly do správneho smeru voči vetru, nastavenie uhla lopatiek (pitch) a spustenie pomocných systémov (chladenie, mazanie, riadiaca elektronika). Po dokončení všetkých troch nastavení je turbína pripravená a RS spustí generátor. Po spustení nasleduje ramp-up výkonu, čo je postupné nábehové zvyšovanie produkcie energie. Posledným krokom je manuálne potvrdenie úspešného spustenia výroby operátorom elektrárne. Proces sa končí stavom \textbf{Výroba spustená} a nadväzuje na proces monitorovania a regulácie prevádzky.
+Po dokončení oboch paralelných kontrol RS vyžiada od DDS finálne povolenie pripojenia. DDS na základe stavu siete buď povolenie udelí, zamietne (napr. pri nedostatočnej kapacite), alebo nereaguje v stanovenom časovom okne, a vtedy RS vyhodnotí timeout. V prípade zamietnutia alebo timeoutu sa proces ukončí. Po udelení povolenia RS pristupuje k samotnému nastaveniu turbíny. Paralelne vykonáva tri činnosti: natočenie gondoly do správneho smeru voči vetru, nastavenie uhla lopatiek (pitch) a spustenie pomocných systémov (chladenie, mazanie, riadiaca elektronika). Po dokončení všetkých troch nastavení je turbína pripravená a RS spustí generátor. Po spustení nasleduje ramp-up výkonu, čo je postupné nábehové zvyšovanie produkcie energie. Posledným krokom je manuálne potvrdenie úspešného spustenia výroby operátorom elektrárne. Pri úspešnej ceste sa proces končí spustením výroby a nadväzuje na proces monitorovania. Proces sa môže ukončiť aj v alternatívnych vetvách, napr. pri nevyhovujúcich poveternostných podmienkach, zamietnutom povolení DDS alebo timeout-e odpovede (bez spustenia výroby). 
 
 
 
@@ -113,7 +117,7 @@ Po dokončení oboch paralelných kontrol RS vyžiada od DDS finálne povolenie 
     \hline
     \textbf{Prechody (22)} & Získaj údaje o vetre, Získaj predpoveď, Vyhodnoť podmienky, Podmienky nesplnené, Podmienky splnené, Skontroluj technický stav, Spusti prípravu (AND split), Skontroluj bezpečnostné limity, Over pripojenie do siete, Kontroly dokončené (AND join), Vyžiadaj povolenie pripojenia, Povolenie udelené, Povolenie zamietnuté, Timeout odpovede, Nastav turbínu (AND split), Natoč gondolu, Nastav uhol lopatiek, Spusť pomocné systémy, Turbína pripravená (AND join), Spusť generátor, Ramp-up výkonu, Potvrď spustenie výroby \\
     \hline
-    \textbf{Stavy (15)} & Spustenie iniciované, Údaje o vetre získané, Predpoveď získaná, Podmienky vyhodnotené, Pokračuj v kontrole, Technický stav OK, Bezpečnosť OK, Pripojenie OK, Kontroly dokončené, Čaká sa na povolenie, Povolenie udelené, Turbína pripravená, Generátor spustený, Výkon nabieha, Výroba spustená \\
+    \textbf{Stavy (23)} & Spustenie iniciované, Údaje o vetre získané, Predpoveď získaná, Podmienky vyhodnotené, Pokračuj v kontrole, Technický stav OK, Bezpečnosť OK, Pripojenie OK, Kontroly dokončené, Čaká sa na povolenie, Povolenie udelené, Turbína pripravená, Generátor spustený, Výkon nabieha, Výroba spustená \\
     \hline
   \end{tabularx}
   \caption{Proces 1 -- Zhrnutie procesu}
@@ -186,20 +190,15 @@ Po dokončení oboch paralelných kontrol RS vyžiada od DDS finálne povolenie 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Petri net
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \subsection{Petriho sieť}
 Navrhnutý model Petriho siete reprezentuje sekvenčno-paralelnú logiku riadenia procesu. Obsahuje mechanizmy vetvenia typu \textbf{XOR} pre rozhodovacie procesy (napr. kontrola podmienok alebo udelenie povolenia) a \textbf{AND} pre paralelné vykonávanie úloh (technické kontroly a nastavovanie turbíny).
 
 \begin{figure}[H]
-  \hspace*{-2cm}
-  \includegraphics[width=1.2\textwidth]{figs/P1/PS_P1_1.png}
-  \caption{Petriho sieť pre Proces 1 (časť 1)}
+  \includegraphics[width=1\textwidth]{figs/P1/PS_P1.png}
+  \caption{Petriho sieť pre Proces 1}
 \end{figure}
 
-\begin{figure}[H]
-  \hspace*{-2cm}
-  \includegraphics[width=1.2\textwidth]{figs/P1/PS_P1_2.png}
-  \caption{Petriho sieť pre Proces 1 (časť 2)}
-\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -230,8 +229,8 @@ Navrhnutý model Petriho siete reprezentuje sekvenčno-paralelnú logiku riadeni
 \subsection{BPMN}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{figs/P1/proces1-spustenie.png}
-  \caption{Proces 1 -- BPMN model}
+  \includegraphics[height=0.9\textheight]{figs/P1/P1_BPMN.png}
+  \caption{Proces 1 -- BPMN}
 \end{figure}
 
 
@@ -253,8 +252,8 @@ Navrhnutý model Petriho siete reprezentuje sekvenčno-paralelnú logiku riadeni
 Proces monitorovania a regulácie prevádzky začína ihneď po úspešnom spustení výroby elektriny. Riadiaci systém (RS) priebežne zbiera senzorové dáta a predspracúva ich pre ďalšie vyhodnotenie. Následne paralelne monitoruje dve skupiny parametrov: 
 \vspace{0.6em}
 \begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
-    \item \textbf{rýchlosť vetra a výkon generátora na jednej strane}
-    \item \textbf{teploty a vibrácie komponentov na druhej strane}
+    \item \textbf{Rýchlosť vetra a výkon generátora na jednej strane}
+    \item \textbf{Teploty a vibrácie komponentov na druhej strane}
 \end{enumerate}
 \vspace{0.6em}
 Po dokončení oboch monitorovacích vetiev RS čaká na jednu z troch udalostí:
@@ -466,11 +465,7 @@ Paralelné vetvenie (AND split) je použité dvojnásobne. Pri paralelnom
 monitorovaní prevádzkových parametrov (vietor/výkon a teploty/vibrácie)
 a pri paralelnej aplikácii nastavení (pitch, yaw, menič/brzdy).
 Proces je cyklický, čiže po každom úspešnom cykle sa vracia do stavu
-monitorovania. 
-
-Model obsahuje dátové pole typu \textit{multichoice\_map}
-(Klasifikácia odchýlky) a \textit{TaskRef} referencujúci úlohu:
-\textbf{Deteguj poruchu (RS)} z Procesu~3, čím je zabezpečené prepojenie procesov pri závažnej poruche.
+monitorovania.
 
 \begin{figure}[H]
   \centering
@@ -504,8 +499,8 @@ Model obsahuje dátové pole typu \textit{multichoice\_map}
 \subsection{BPMN}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{figs/P2/proces2-monitorovanie.png}
-  \caption{Proces 2 -- BPMN model}
+  \includegraphics[height=0.9\textheight]{figs/P2/P2_BPMN.png}
+  \caption{Proces 2 -- BPMN}
 \end{figure}
 
 
@@ -517,35 +512,56 @@ Model obsahuje dátové pole typu \textit{multichoice\_map}
 \newpage
 \section{Proces 3 -- Riešenie poruchy a obnovenie prevádzky}
 \subsection{Popis procesu}
-Proces riešenia poruchy začína zaznamenaním poruchového hlásenia. Poruchu najskôr deteguje riadiaci systém, ktorý zároveň zaznamená hlásenie o vzniknutej poruche. Následne operátor elektrárne vyhodnotí situáciu a rozhoduje, či ide o kritickú poruchu. Ak ide o kritickú poruchu, riadiaci systém vykoná núdzové zastavenie turbíny. Ak porucha nie je kritická, operátor zabezpečí plánované odstavenie zariadenia.
+Proces riešenia poruchy a obnovenia prevádzky začína nahlásením poruchy
+zo systému (alarm zo senzorov alebo manuálne hlásenie). RS najprv poruchu deteguje, zaznamená hlásenie do logu a zhromaždí
+diagnostické údaje. Následne O vyhodnotí situáciu
+a rozhodne o závažnosti poruchy.\textbf{Ak je porucha} \textbf{kritická}, \textbf{RS okamžite vykoná núdzové zastavenie turbíny}.
 
-Po odstavení zariadenia sa riadiacim systémom vytvorí servisná úloha, na základe ktorej servisný technik vykoná diagnostiku problému a následne realizuje opravu. Po dokončení opravy servisný technik vykoná test funkčnosti zariadenia. Na základe výsledku testu sa rozhodne, či je zariadenie v poriadku. Ak je zariadenie funkčné, riadiaci systém zabezpečí opätovné spustenie výroby a dispečer distribučnej siete je informovaný o obnovení dodávky. Proces sa tým končí obnovením prevádzky. Ak zariadenie nie je v poriadku, problém sa eskaluje a proces riešenia sa opakuje až do úspešného odstránenia poruchy alebo odovzdania problému na vyššiu úroveň riešenia.
-Ak oprava trvá neprimerane dlho, operátor elektrárne eskaluje problém (napr. na vyššiu úroveň podpory).
+Ak kritická nie je, O zabezpečí plánované odstavenie zariadenia.
+V oboch prípadoch sa následne paralelne pripravuje servisný zásah.
+RS vytvorí servisnú úlohu a informuje DDS o odstávke, DDS zaeviduje odstávku v sieti a operátor súčasne zabezpečí fyzický prístup k zariadeniu a bezpečnostné opatrenia. Po pripravení servisu pristúpi ST k diagnostike na mieste. Na základe diagnostiky rozhodne, či je potrebný náhradný diel. Ak diel netreba, technik priamo vykoná opravu alebo kalibráciu. Ak diel treba, čaká sa na jeho doručenie, ak dodávka mešká, ST urguje dodávateľa. Po doručení dielu ST vymení komponent
+a následne vykoná opravu/kalibráciu. Po dokončení opravy ST vykoná
+test funkčnosti zariadenia a rozhodne, či je zariadenie v poriadku.
+Ak nie je, opakuje sa oprava (cyklus). Po úspešnom teste RS požiada DDS o opätovné pripojenie do siete.
+DDS môže pripojenie schváliť, zamietnuť, alebo nereagovať v stanovenom
+čase (timeout). Pri zamietnutí operátor naplánuje opätovnú žiadosť
+a po krátkej pauze sa žiadosť opakuje. Pri timeout-e operátor priamo
+kontaktuje DDS. Po schválení RS opätovne spustí výrobu a DDS odošle
+oznámenie o obnovení dodávky. Proces sa končí stavom \textbf{Prevádzka
+obnovená} a nadväzuje opäť na Proces~2.
 
+\clearpage
 \subsection{Procesné informácie (tokeny, prechody, stavy)}
-\begin{table}[H]
+\begin{table}[H] 
   \centering
-  \renewcommand{\arraystretch}{1.2}
+  \small
+  \renewcommand{\arraystretch}{1.15} 
   \begin{tabularx}{\textwidth}{|p{0.22\textwidth}|X|}
+    \hline
+    \textbf{Pole} & \textbf{Hodnota} \\
     \hline
     \textbf{Názov procesu} & Riešenie poruchy a obnovenie prevádzky \\
     \hline
-    \textbf{Popis} & Po detekcii poruchy systém zaznamená hlásenie, zhromaždí diagnostické údaje a operátor rozhodne o kritickosti. Pri kritickej poruche prebehne núdzové zastavenie, inak plánované odstavenie. Po odstavení sa paralelne vytvorí servisná úloha, informuje sa dispečer a zabezpečí sa prístup a bezpečnosť na mieste. Servisný technik vykoná diagnostiku a opravu; ak je potrebný náhradný diel, čaká sa na dodávku a rieši sa oneskorenie. Po úspešnej oprave systém požiada DDS o opätovné pripojenie (schválenie/zamietnutie/timeout) a po schválení obnoví výrobu a odošle oznámenie, ktoré DDS zaeviduje. Pri dlhom riešení môže operátor incident eskalovať. \\
+    \textbf{Popis} & Po detekcii poruchy RS zaznamená hlásenie a zhromaždí diagnostické údaje. O rozhodne o kritickosti, kde kritická porucha vedie k núdzovému zastaveniu, nekritická k plánovanému odstaveniu. Paralelne sa pripraví servisný zásah (vytvorenie servisnej úlohy, informovanie DDS, zabezpečenie prístupu). ST vykoná diagnostiku, rozhodne o potrebe náhradného dielu, realizuje opravu a test funkčnosti. Pri neúspechu testu sa oprava opakuje. Po úspešnom teste sa žiada DDS o opätovné pripojenie (s vetvami pre zamietnutie a timeout) a obnoví sa výroba. \\
     \hline
-    \textbf{Roly} & Riadiaci systém (RS), Operátor elektrárne (O), Servisný technik (ST), Dispečer distribučnej siete (DDS) \\
+    \textbf{Roly} & RS, O, ST, DDS \\
     \hline
-    \textbf{Vstupné tokeny} & Poruchové hlásenie (alarm), diagnostické údaje, servisná požiadavka, dostupnosť pripojenia do siete (DDS), náhradné diely \\
+    \textbf{Vstupné tokeny} & 1 token v P0 (Porucha nahlásená), diagnostické údaje, servisná požiadavka \\
     \hline
-    \textbf{Výstupné tokeny} & Prevádzka obnovená + zaevidovanie v DDS alebo eskalovaný incident / odložené pripojenie (opakovaná žiadosť) \\
+    \textbf{Výstupné tokeny} & Prevádzka obnovená (1 token v P\_END, koniec procesu, nadväzuje na Proces 2) \\
     \hline
-    \textbf{Prechody} & Deteguj poruchu, zaznamenaj hlásenie, zhromaždi diagnostické údaje, vyhodnoť situáciu, rozhodni kritickosť, núdzové zastavenie / plánované odstavenie, vytvor servisnú úlohu, informuj DDS o odstávke, zaeviduj odstávku, zabezpeč prístup, diagnostika na mieste, čakanie na diel / urgencia, výmena dielu, oprava/kalibrácia, test funkčnosti, rozhodni či je zariadenie OK, požiadaj o opätovné pripojenie, čakaj na odpoveď DDS, naplánuj opätovnú žiadosť / kontaktuj DDS, opätovne spusti výrobu, odošli oznámenie o obnovení, zaeviduj obnovu, eskaluj problém \\
+    \textbf{Prechody (34)} & Deteguj poruchu, Zaznamenaj hlásenie, Zhromaždi diagnostické údaje, Vyhodnoť situáciu, Porucha kritická, Porucha nekritická, Núdzové zastavenie, Plánované odstavenie, Príprava servisu, Vytvor servisnú úlohu, Informuj DDS o odstávke, Zaeviduj odstávku, Zabezpeč prístup a bezpečnosť, Servis pripravený, Diagnostika na mieste, Náhradný diel netreba, Náhradný diel treba, Diel doručený, Dodávka mešká, Urgencia dodávky dielu, Vymeň náhradný diel, Oprava/kalibrácia, Test funkčnosti, Zariadenie OK, Zariadenie nie OK, Požiadaj o opätovné pripojenie, Schválené pripojenie, Zamietnuté pripojenie, Timeout odpovede, Naplánuj opätovnú žiadosť, Počkaj pred opakovaním, Kontaktuj DDS, Opätovne spusti výrobu, Odošli oznámenie o obnovení \\
     \hline
-    \textbf{Stavy} & Porucha detegovaná, hlásenie zaznamenané, diagnostické údaje pripravené, turbína odstavená, servisná úloha vytvorená, DDS informovaná, odstávka zaevidovaná, prístup zabezpečený, diagnostika vykonaná, diel potrebný/nepotrebný, diel doručený/oneskorený, oprava vykonaná, test vykonaný, zariadenie OK/nie OK, žiadosť o pripojenie odoslaná, odpoveď DDS prijatá (schválené/zamietnuté/timeout), výroba obnovená, obnova zaevidovaná, incident eskalovaný \\
+    \textbf{Stavy (30)} & Porucha nahlásená, Porucha detegovaná, Hlásenie zaznamenané, Diagnostické údaje pripravené, Kritickosť rozhodnutá, Kritická porucha, Nekritická porucha, Turbína odstavená, Servisná úloha, Odstávka nahlásená, Prístup zabezpečený, Servisná úloha vytvorená, DDS informovaná, Odstávka zaevidovaná, Prístup a bezpečnosť OK, Servis pripravený, Diagnostika hotová, Pripravený na opravu, Čakaj na diel, Pripravený na výmenu dielu, Test, Test vykonaný, Zariadenie OK, Čakaj na odpoveď DDS, Pripojenie schválené, Pripojenie zamietnuté, Timeout odpovede, Opakovať žiadosť, Výroba obnovená, Koniec (Prevádzka obnovená) \\
     \hline
   \end{tabularx}
   \caption{Proces 3 -- Zhrnutie procesu}
 \end{table}
 
+
+
+
+\newpage
 \subsection{Procesné roly}
 \begin{table}[H]
   \centering
@@ -554,107 +570,291 @@ Ak oprava trvá neprimerane dlho, operátor elektrárne eskaluje problém (napr.
     \hline
     \textbf{Rola} & \textbf{Úloha} \\
     \hline
-    Riadiaci systém & Deteguje poruchu, zaznamenáva hlásenia, zhromažďuje diagnostické údaje, vykonáva núdzové zastavenie (ak treba), vytvára servisnú úlohu, informuje DDS, žiada o opätovné pripojenie a po schválení zabezpečuje obnovenie výroby a odoslanie oznámenia. \\
+    RS & Deteguje poruchu, zaznamenáva hlásenia, zhromažďuje
+    diagnostické údaje, vykonáva núdzové zastavenie (pri kritickej poruche),
+    vytvára servisnú úlohu, informuje DDS o odstávke, žiada o opätovné
+    pripojenie do siete, vyhodnocuje timeout odpovede, riadi časové oneskorenie
+    pred opakovaním žiadosti a po schválení opätovne spúšťa výrobu. \\
     \hline
-    Operátor elektrárne & Vyhodnocuje situáciu, rozhoduje o kritickosti poruchy a o type odstavenia; zabezpečuje prístup a bezpečnosť, pri zamietnutí/timeoutoch koordinuje opakovanú žiadosť a pri dlhom riešení eskaluje incident. \\
+    O & Vyhodnocuje situáciu a rozhoduje o kritickosti
+    poruchy. Pri nekritickej poruche zabezpečuje plánované odstavenie,
+    pri servise zabezpečuje fyzický prístup a bezpečnostné opatrenia.
+    Plánuje opätovné žiadosti o pripojenie pri zamietnutí a kontaktuje
+    DDS pri timeout-e odpovede. \\
     \hline
-    Servisný technik & Vykonáva diagnostiku na mieste, realizuje opravu/kalibráciu a test funkčnosti; ak je potrebný náhradný diel, rieši čakanie a výmenu dielu, následne rozhoduje o pripravenosti zariadenia na spustenie. \\
+    ST & Vykonáva diagnostiku na mieste, rozhoduje
+    o potrebe náhradného dielu, vybavuje doručenie dielu (vrátane
+    urgencie pri meškaní), realizuje výmenu komponentu a opravu
+    alebo kalibráciu. Vykonáva test funkčnosti a rozhoduje, či je
+    zariadenie pripravené na opätovné spustenie. \\
     \hline
-    Dispečer distribučnej siete & Eviduje odstávku a obnovu dodávky v sieti a poskytuje odpoveď na žiadosť o opätovné pripojenie (schválenie/zamietnutie). \\
+    DDS & Eviduje odstávky elektrárne v sieti,
+    schvaľuje alebo zamieta opätovné pripojenie po oprave a po obnovení
+    výroby zasiela oznámenie o obnovení dodávky. \\
     \hline
   \end{tabularx}
   \caption{Proces 3 -- Popis rolí}
 \end{table}
 
+\newpage
 \subsection{Procesné roly (priradenie činností)}
 \begin{table}[H]
   \centering
   \small
   \renewcommand{\arraystretch}{1.2}
-  \begin{tabularx}{\textwidth}{|X|p{0.14\textwidth}|p{0.14\textwidth}|p{0.14\textwidth}|p{0.14\textwidth}|}
+  \begin{tabularx}{\textwidth}{|X|p{0.10\textwidth}|p{0.10\textwidth}|p{0.10\textwidth}|p{0.10\textwidth}|}
     \hline
     \textbf{Činnosť} & \textbf{RS} & \textbf{O} & \textbf{ST} & \textbf{DDS} \\
     \hline
-    Deteguj poruchu & X &  &  &  \\
+    Deteguj poruchu & X & & & \\
     \hline
-    Zaznamenaj hlásenie & X &  &  &  \\
+    Zaznamenaj hlásenie & X & & & \\
     \hline
-    Zhromaždi diagnostické údaje & X &  &  &  \\
+    Zhromaždi diagnostické údaje & X & & & \\
     \hline
-    Vyhodnoť situáciu &  & X &  &  \\
+    Vyhodnoť situáciu & & X & & \\
     \hline
-    Rozhodni kritickosť poruchy &  & X &  &  \\
+    Porucha kritická & & X & & \\
     \hline
-    Núdzové zastavenie turbíny & X &  &  &  \\
+    Porucha nekritická & & X & & \\
     \hline
-    Plánované odstavenie &  & X &  &  \\
+    Núdzové zastavenie & X & & & \\
     \hline
-    Vytvor servisnú úlohu & X &  &  &  \\
+    Plánované odstavenie & & X & & \\
     \hline
-    Informuj DDS o odstávke & X &  &  &  \\
+    Príprava servisu (AND split) & X & & & \\
     \hline
-    Zaeviduj odstávku v sieti &  &  &  & X \\
+    Vytvor servisnú úlohu & X & & & \\
     \hline
-    Zabezpeč prístup a bezpečnosť &  & X &  &  \\
+    Informuj DDS o odstávke & X & & & \\
     \hline
-    Diagnostika na mieste &  &  & X &  \\
+    Zaeviduj odstávku & & & & X \\
     \hline
-    Urgencia dodávky dielu &  &  & X &  \\
+    Zabezpeč prístup a bezpečnosť & & X & & \\
     \hline
-    Vymeň náhradný diel &  &  & X &  \\
+    Servis pripravený (AND join) & X & & & \\
     \hline
-    Oprava/kalibrácia &  &  & X &  \\
+    Diagnostika na mieste & & & X & \\
     \hline
-    Test funkčnosti zariadenia &  &  & X &  \\
+    Náhradný diel netreba & & & X & \\
     \hline
-    Rozhodni či je zariadenie OK &  &  & X &  \\
+    Náhradný diel treba & & & X & \\
     \hline
-    Požiadaj o opätovné pripojenie & X &  &  &  \\
+    Diel doručený & & & X & \\
     \hline
-    Naplánuj opätovnú žiadosť &  & X &  &  \\
+    Dodávka mešká (timer) & & & X & \\
     \hline
-    Kontaktuj DDS &  & X &  &  \\
+    Urgencia dodávky dielu & & & X & \\
     \hline
-    Opätovne spusti výrobu & X &  &  &  \\
+    Vymeň náhradný diel & & & X & \\
     \hline
-    Odošli oznámenie o obnovení & X &  &  &  \\
+    Oprava/kalibrácia & & & X & \\
     \hline
-    Zaeviduj obnovu dodávky &  &  &  & X \\
+    Test funkčnosti & & & X & \\
     \hline
-    Eskaluj problém &  & X &  &  \\
+    Zariadenie OK & & & X & \\
+    \hline
+    Zariadenie nie OK & & & X & \\
+    \hline
+    Požiadaj o opätovné pripojenie & X & & & \\
+    \hline
+    Schválené pripojenie & & & & X \\
+    \hline
+    Zamietnuté pripojenie & & & & X \\
+    \hline
+    Timeout odpovede & X & & & \\
     \hline
   \end{tabularx}
-  \caption{Proces 3 -- Priradenie činností k rolám}
+  \caption{Proces 3 -- Priradenie činností k rolám (1. časť)}
+\end{table}
+\newpage 
+\begin{table}[H]
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabularx}{\textwidth}{|X|p{0.10\textwidth}|p{0.10\textwidth}|p{0.10\textwidth}|p{0.10\textwidth}|}
+    \hline
+    \textbf{Činnosť} & \textbf{RS} & \textbf{O} & \textbf{ST} & \textbf{DDS} \\
+    \hline
+    Naplánuj opätovnú žiadosť & & X & & \\
+    \hline
+    Počkaj pred opakovaním (timer) & X & & & \\
+    \hline
+    Kontaktuj DDS & & X & & \\
+    \hline
+    Opätovne spusti výrobu & X & & & \\
+    \hline
+    Odošli oznámenie o obnovení & & & & X \\
+    \hline
+  \end{tabularx}
+  \caption{Proces 3 -- Priradenie činností k rolám (2. časť)}
 \end{table}
 
+
+
+\newpage
 \subsection{Petriho sieť}
-Model procesu bol navrhnutý ako Petriho sieť v nástroji Netgrif Builder. Model obsahuje rozhodovanie (XOR split), paralelné vetvenie (AND split), dátové polia (enumeration\_map) a TaskRef na úlohu z iného procesu.
-\begin{figure}[H]
+Model obsahuje viacero rozhodovaní (XOR split), ako sú rozhodovanie o kritickosti poruchy (kritická/nekritická), rozhodovanie o potrebe náhradného dielu (treba/netreba), event-based rozhodovanie pri čakaní na diel (doručený/mešká/urgencia), vyhodnotenie testu funkčnosti (OK/nie OK) a trojcestné rozhodovanie o opätovnom pripojení do siete od DDS (schválené/zamietnuté/timeout). Paralelné vetvenie (AND split) je použité pri príprave servisu, súčasne sa vytvára servisná úloha, informuje sa DDS o odstávke a O zabezpečuje fyzický prístup k zariadeniu. 
+
+
+\vspace{0.6em}
+Model obsahuje dva cykly:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{opakovanie opravy pri neúspešnom teste}
+    \item \textbf{opakovanie žiadosti o pripojenie pri zamietnutí}
+\end{enumerate}
+\vspace{0.6em}
+
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{petri/proces3-porucha.png}
-  \caption{Proces 3 -- Petriho sieť}
+  \includegraphics[width=\textwidth]{figs/P3/PS_P3.png}
+  \caption{Petriho sieť pre Proces 3}
 \end{figure}
 
-\subsection{Graf dosiahnuteľnosti}
-\emph{TODO: Sem doplniť graf dosiahnuteľnosti pre vybraný proces.}
 
+
+
+\newpage
+\subsection{Graf dosiahnuteľnosti}
+\begin{figure}[htbp] 
+  \centering
+  \includegraphics[width=0.32\textwidth]{figs/P3/P3_ReachabilityGraph.png}
+  \caption{Graf dosiahnuteľnosti pre Proces 3}
+\end{figure}
+
+
+\newpage
 \subsection{Obrazovky}
 \emph{TODO: Sem doplniť návrh obrazoviek pre prechody Petriho siete.}
 
+\newpage
 \subsection{BPMN}
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{bpmn/proces3-porucha.png}
+  \includegraphics[width=0.2\textwidth]{figs/P3/P3_BPMN.png}
   \caption{Proces 3 -- BPMN model}
 \end{figure}
 
+\newpage
+\section{Kolaborácia medzi procesmi (BPMN)}
+Nasledujúci BPMN model zobrazuje \textbf{kolaboráciu} medzi všetkými troma procesmi a dvoma externými účastníkmi (DDS, ST). Každý proces je modelovaný ako samostatný \textit{pool}, externí účastníci sú zobrazení ako samostatné pooly bez detailnej internej štruktúry. Prerušované šípky reprezentujú \textbf{message flows}, čiže komunikačné správy medzi poolmi.
+
+\vspace{0.6em}
+Hlavné správy medzi procesmi:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{P1 $\to$ P2}: \textbf{Výroba spustená} -- spustenie nadväzujúceho monitoringu po úspešnom štarte
+    \item \textbf{P2 $\to$ P3}: \textbf{Závažná porucha} -- pri detekcii kritickej odchýlky monitorovanie aktivuje proces riešenia poruchy
+    \item \textbf{P3 $\to$ P2}: \textbf{Prevádzka obnovená} -- po oprave a opätovnom pripojení sa proces vracia k monitorovaniu
+\end{enumerate}
+\vspace{0.6em}
+
+Komunikácia s externými účastníkmi:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{DDS} komunikuje so všetkými troma procesmi (povolenia
+    pripojenia v P1, údaje a regulácia v P2, odstávky a opätovné pripojenie
+    v P3)
+    \item \textbf{ST} komunikuje výlučne s P3 počas servisných zásahov
+\end{enumerate}
+\vspace{0.6em}
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figs/bpmn_collaboration.png}
+  \caption{Kolaborácia medzi P1, P2 a P3}
+\end{figure}
+
+\newpage
+%\section{Poznámky k súladu so zadaním}
+%\begin{itemize}
+%  \item Slovné popisy: v dokumente sú popísané 3 procesy (splnené).
+%  \item Procesné roly: v dokumente sú tabuľky rolí a činností pri každom procese; celkovo sú identifikované minimálne 4 roly (splnené).
+%  \item BPMN: doplnené AND/XOR brány, event-based brána, cyklus, podproces, boundary event a artefakty (splnené).
+%  \item Petriho siete: doplnené obrázky modelov procesov (splnené).
+%  \item Grafy dosiahnuteľnosti a obrazovky: ponechané ako TODO (doplní sa v ďalšom kroku).
+%\end{itemize}
+
 \section{Poznámky k súladu so zadaním}
-\begin{itemize}
-  \item Slovné popisy: v dokumente sú popísané 3 procesy (splnené).
-  \item Procesné roly: v dokumente sú tabuľky rolí a činností pri každom procese; celkovo sú identifikované minimálne 4 roly (splnené).
-  \item BPMN: doplnené AND/XOR brány, event-based brána, cyklus, podproces, boundary event a artefakty (splnené).
-  \item Petriho siete: doplnené obrázky modelov procesov (splnené).
-  \item Grafy dosiahnuteľnosti a obrazovky: ponechané ako TODO (doplní sa v ďalšom kroku).
-\end{itemize}
+
+V tejto sekcii sumarizujeme, ako náš projekt napĺňa jednotlivé body
+zadania.
+
+\subsection{Bod 1 - Popis procesov}
+Slovne sme popísali 3 procesy  (sekcie 3.1, 4.1, 5.1). Zo spomenutých popisov je jasné, ako procesy prebiehajú, aké činnosti sa vykonávajú, kto ich vykonáva a ako začínajú a končia.
+Prehľadový procesný model je prvý obrázok v dokumente, v sekcii 2 (Obr. 1). Ďalej sme definovali štyri procesné roly: \textbf{Riadiaci systém} (RS), \textbf{Operátor elektrárne} (O), \textbf{Servisný technik} (ST) a \textbf{Dispečer distribučnej siete} (DDS), zoznam aj so skratkami je poskytnutý na začiatku, v sekcii 1. Pre každý proces sú samostaté tabuľky rolí a činností (Tabuľky 2+3, 5+6+7, 9+10),
+v ktorých sú jednoznačne priradené činnosti k rolám a vysvetlené roly.
+
+\subsection{Bod 2 - Petriho siete}
+Modely všetkých troch procesov sme vyjadrili ako Petriho siete
+v nástroji Netgrif Builder (sekcie 3.5, 4.5, 5.5). Každý proces začína jedným počiatočným miestom \textbf{P0} s jedným tokenom a končí jedným koncovým miestom: \textbf{P\_END} v P1 a P3, \textbf{P\_TO\_TROUBLE} v P2 ktorý nadväzuje na P3. Označenie prechodov obsahuje názov činnosti aj rolu, ktorá ju vykonáva. \textbf{Počet prechodov} je vyjadrený číslom v tabuľkách s informáciami o procese: P1 -- 22, P2 -- 42, P3 -- 34 (každý nad minimom 9). {Celkový počet rolí} je 4 (RS, O, DDS, ST), čo tiež spĺňa minimum. Pomenovanie miest reflektuje zodpovedajúce stavy procesov. Prechody nie sú L0 živé (každý prechod je spustiteľný
+v aspoň jednom dosiahnuteľnom značkovaní, čo máme aj preukázané v grafoch dosiahnuteľnosti). 
+
+\vspace{0.6em}
+Každý proces obsahuje aspoň jeden \textbf{XOR split}:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{P1} vyhodnotenie podmienok, povolenie DDS
+    \item \textbf{P2} event-based,
+    stabilita, závažnosť, fyzická kontrola, limity
+    \item \textbf{P3} kritickosť,
+    diel, test, pripojenie DDS
+\end{enumerate}
+\vspace{0.6em}
+
+\vspace{0.6em}
+Každý proces obsahuje aspoň jedno \textbf{paralelné vetvenie (AND)}:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{P1} paralelné kontroly, paralelné nastavenie turbíny
+    \item \textbf{P2} paralelné monitorovanie, paralelná aplikácia nastavení
+    \item \textbf{P3} príprava servisu
+\end{enumerate}
+\vspace{0.6em}
+
+Každý proces obsahuje \textbf{dátové pole} typu z požadovanej skupiny:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{P1 - enumeration} stav vetra
+    \item \textbf{P2 - multichoice\_map} klasifikácia odchýlky
+    \item \textbf{P3 - enumeration\_map} kritickosť
+\end{enumerate}
+\vspace{0.6em}
+
+Každý proces obsahuje \textbf{TaskRef} referencujúci task z iného procesu:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{P1$\to$P2} Monitoruj parametre
+    \item \textbf{P2$\to$P3} Deteguj poruchu
+    \item \textbf{P3$\to$P1} Spusti generátor
+\end{enumerate}
+\vspace{0.6em}
+Pre všetky tri procesy sme zostrojili \textbf{grafy dosiahnuteľnosti} (sekcie 3.6, 4.6, 5.6), ktoré preukazujú
+dosiahnuteľnosť koncových stavov.
+
+
+\subsection{Bod 3 - Implementácia procesne riadenej aplikácie}
+\textcolor{red}{Pre vybrané prechody Petriho siete sme navrhli obrazovky s formulármi (sekcie 3.7, 4.7, 5.7). Kompletné procesy s dátovými premennými, rolami a obrazovkami
+sú implementované v Netgrif a nasadené na procesnom serveri
+(ukážka v sprievodnom videu)}
+
+
+\subsection{Bod 4 - BPMN modely}
+Modely všetkých troch procesov v notácii BPMN sme vložili do  sekcií 3.8, 4.8 a 5.8. Použité sú \textbf{AND brány} a \textbf{XOR brány} vo všetkých procesoch. Event-based brány sú použité v P2 (časovač/alarm/
+DDS požiadavka) a P3 (čakanie na náhradný diel, odpoveď DDS). P2 je cyklický (monitorovanie sa opakuje). P3 obsahuje dva cykly (opakovanie opravy, opakovanie žiadosti o pripojenie). P2 obsahuje podproces \textbf{DDS regulácia} (viď Obr.~7).
+Použité eventy zahŕňajú start event, intermediate event (timer
+pri čakaní na diel/odpoveď v P3) a end events sú použité podľa
+sémantiky procesov. 
+
+\vspace{0.6em}
+Každej úlohe je priradený vhodný typ:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=1.5cm]
+    \item \textbf{Service Task} pre automatizované činnosti RS
+    \item \textbf{User Task} pre operátora a technika
+    \item \textbf{Send/Receive Task} pre komunikáciu s DDS
+\end{enumerate}
+\vspace{0.6em}
+
+\subsection{Odovzdanie}
+Dokument odovzdávame v \textbf{PDF formáte} s titulnou
+stranou obsahujúcou všetky identifikačné údaje. Dokument obsahuje slovný popis procesov, prehľadový procesný
+model, tabuľky rolí a činností, grafy dosiahnuteľnosti, obrázky
+modelov Petriho sietí (vrátane obrazoviek) a BPMN modely.
+\textcolor{red}{Zdrojové súbory pre modely (XML pre Petriho siete, BPMN súbory sú priložené samostatne. Súčasťou odovzdania je aj \textbf{video} vo formáte MP4, ktoré demonštruje fungovanie procesu nasadeného na procesnom serveri.}
 
 \end{document}
