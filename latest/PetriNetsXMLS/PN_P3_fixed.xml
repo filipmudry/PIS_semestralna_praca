@@ -966,14 +966,6 @@
 		<tokens>0</tokens>
 		<static>false</static>
 	</place>
-	<place>
-		<id>P_CALL</id>
-		<x>4150</x>
-		<y>440</y>
-		<label>Kontaktovať DDS</label>
-		<tokens>0</tokens>
-		<static>false</static>
-	</place>
 
 	<place>
 		<id>P_STARTED</id>
