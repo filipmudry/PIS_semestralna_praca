@@ -1,4 +1,4 @@
-<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://petriflow.com/petriflow.schema.xsd">
+<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://modeler.netgrif.com/petriflow_schema.xsd">
 	<id>ve_proces1_spustenie</id>
 	<version>1.0.0</version>
 	<initials>VE1</initials>
@@ -39,6 +39,36 @@
 		<component>
 			<name>Zbieraj senzorové dáta (RS)</name>
 		</component>
+	</data>
+
+	<data type="enumeration">
+		<id>grid_status</id>
+		<title>Stav distribučnej siete</title>
+		<options>
+			<option key="available">Dostupná</option>
+			<option key="limited">Obmedzená kapacita</option>
+			<option key="unavailable">Nedostupná</option>
+		</options>
+	</data>
+	<data type="number">
+		<id>grid_capacity_mw</id>
+		<title>Dostupná kapacita siete (MW)</title>
+	</data>
+	<data type="text">
+		<id>rejection_reason</id>
+		<title>Dôvod zamietnutia</title>
+	</data>
+	<data type="text">
+		<id>permission_note</id>
+		<title>Poznámka k povoleniu</title>
+	</data>
+	<data type="enumeration">
+		<id>startup_decision</id>
+		<title>Rozhodnutie o spustení</title>
+		<options>
+			<option key="confirm">Potvrdiť spustenie</option>
+			<option key="cancel">Zrušiť spustenie</option>
+		</options>
 	</data>
 
 	<transition>
@@ -192,6 +222,22 @@
 			<id>t9_0</id>
 			<cols>4</cols>
 			<layout>grid</layout>
+			<dataRef>
+				<id>grid_status</id>
+				<logic>
+					<behavior>editable</behavior>
+					<behavior>required</behavior>
+				</logic>
+				<layout><x>0</x><y>0</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
+			<dataRef>
+				<id>grid_capacity_mw</id>
+				<logic>
+					<behavior>editable</behavior>
+					<behavior>required</behavior>
+				</logic>
+				<layout><x>0</x><y>1</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
 		</dataGroup>
 	</transition>
 	<transition>
@@ -243,6 +289,20 @@
 			<id>t12_0</id>
 			<cols>4</cols>
 			<layout>grid</layout>
+			<dataRef>
+				<id>wind_condition</id>
+				<logic>
+					<behavior>visible</behavior>
+				</logic>
+				<layout><x>0</x><y>0</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
+			<dataRef>
+				<id>permission_note</id>
+				<logic>
+					<behavior>editable</behavior>
+				</logic>
+				<layout><x>0</x><y>1</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
 		</dataGroup>
 	</transition>
 	<transition>
@@ -260,6 +320,14 @@
 			<id>t13_0</id>
 			<cols>4</cols>
 			<layout>grid</layout>
+			<dataRef>
+				<id>rejection_reason</id>
+				<logic>
+					<behavior>editable</behavior>
+					<behavior>required</behavior>
+				</logic>
+				<layout><x>0</x><y>0</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
 		</dataGroup>
 	</transition>
 	<transition>
@@ -413,6 +481,28 @@
 			<id>t22_0</id>
 			<cols>4</cols>
 			<layout>grid</layout>
+			<dataRef>
+				<id>wind_condition</id>
+				<logic>
+					<behavior>visible</behavior>
+				</logic>
+				<layout><x>0</x><y>0</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
+			<dataRef>
+				<id>startup_decision</id>
+				<logic>
+					<behavior>editable</behavior>
+					<behavior>required</behavior>
+				</logic>
+				<layout><x>0</x><y>1</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
+			<dataRef>
+				<id>taskref_monitoring</id>
+				<logic>
+					<behavior>editable</behavior>
+				</logic>
+				<layout><x>0</x><y>2</y><rows>1</rows><cols>4</cols><offset>0</offset><template>material</template><appearance>outline</appearance></layout>
+			</dataRef>
 		</dataGroup>
 	</transition>
 
